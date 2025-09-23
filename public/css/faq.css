@@ -1,0 +1,121 @@
+/*============================================================================================*/
+/* FAQ PAGE */
+/*============================================================================================*/
+a.box_topic {
+  text-align: center;
+  background: #fff;
+  padding: 40px 30px 15px 30px;
+  display: block;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.05);
+  color: #444;
+  margin-bottom: 30px;
+  overflow: hidden;
+  border-radius: 3px;
+}
+@media (max-width: 767px) {
+  a.box_topic {
+    padding: 20px 20px 0 20px;
+  }
+}
+a.box_topic:hover {
+  transform: translateY(-10px);
+}
+a.box_topic i {
+  display: inline-block;
+  font-size: 51px;
+  font-size: 3.1875rem;
+  color: #004dda;
+  border-radius: 50%;
+  background-color: #0044c2;
+  background-color: rgba(0, 77, 218, 0.05);
+  width: 100px;
+  height: 100px;
+  line-height: 100px;
+  margin-bottom: 15px;
+}
+a.box_topic h3 {
+  font-size: 18px;
+  font-size: 1.125rem;
+}
+a.box_topic.version_2 {
+  background: none;
+  padding: 0;
+  box-shadow: none;
+  text-align: left;
+}
+
+a.box_topic_2 {
+  padding: 30px 30px 5px 110px;
+  position: relative;
+  display: block;
+  transition: all 0.3s ease-in-out;
+  color: #444;
+  margin-bottom: 30px;
+  border-radius: 3px;
+  min-height: 165px;
+  border: 1px solid #ededed;
+}
+@media (max-width: 991px) {
+  a.box_topic_2 {
+    min-height: inherit;
+  }
+}
+a.box_topic_2:hover {
+  border: 1px solid transparent;
+  box-shadow: 0px 0px 25px 0px rgba(0, 77, 218, 0.1);
+  transform: translateY(-10px);
+}
+a.box_topic_2 i {
+  position: absolute;
+  left: 30px;
+  top: 30px;
+  font-size: 52px;
+  font-size: 3.25rem;
+  color: #004dda;
+  margin-bottom: 10px;
+}
+a.box_topic_2 h3 {
+  font-size: 18px;
+  font-size: 1.125rem;
+  color: #004dda;
+}
+a.box_topic_2 p {
+  font-size: 16px;
+  font-size: 1rem;
+}
+
+.list_articles ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.list_articles ul li {
+  float: left;
+  width: 45%;
+  margin-right: 45px;
+  padding: 15px 0;
+  border-bottom: 1px solid #ededed;
+}
+.list_articles ul li a {
+  color: #444;
+  display: block;
+}
+.list_articles ul li a:hover {
+  color: #004dda;
+  transform: translateX(5px);
+}
+.list_articles ul li i {
+  margin-right: 10px;
+  font-size: 16px;
+  font-size: 1rem;
+  position: relative;
+  top: 2px;
+}
+@media (max-width: 991px) {
+  .list_articles ul li {
+    float: none;
+    width: 100%;
+    margin-right: 0;
+  }
+}
