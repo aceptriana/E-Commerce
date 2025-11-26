@@ -34,5 +34,7 @@
 <!-- SPECIFIC SCRIPTS -->
 <script src="<?= base_url('js/carousel-home.min.js') ?>"></script>
 
+<?= $this->renderSection('js') ?>
+
 </body>
 </html>

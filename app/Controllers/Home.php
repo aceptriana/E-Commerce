@@ -39,7 +39,7 @@ class Home extends BaseController
         }
         
         $data = [
-            'title' => 'Toko Kalina - Gordyn & Wallpaper',
+            'title' => 'Mantra Jaya Tani - Gordyn & Wallpaper',
             'produk' => $produk,
             'kategori' => $kategori,
         ];

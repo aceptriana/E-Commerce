@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     
-    <title>TOKO KALINA GORDYN DAN WALLPAPER</title>
+    <title>Mantra Jaya Tani GORDYN DAN WALLPAPER</title>
 
     <!-- Favicons-->
     <link rel="shortcut icon" href="<?= base_url('img/favicon.ico') ?>" type="image/x-icon">
@@ -141,9 +141,7 @@
                                 </div>
                                 <!-- /dropdown-cart-->
                             </li>
-                            <li>
-                                <a href="<?= base_url('my-wishlist.html') ?>" class="wishlist"><span>Wishlist</span></a>
-                            </li>
+                        
                             <li>
                                 <div class="dropdown dropdown-access">
                                     <a href="<?= base_url('account.html') ?>" class="access_link"><span>Account</span></a>

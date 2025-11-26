@@ -5,18 +5,21 @@ namespace App\Controllers;
 use App\Models\ProdukModel;
 use App\Models\KategoriModel;
 use App\Models\FotoProdukModel;
+use App\Models\UlasanModel;
 
 class Produk extends BaseController
 {
     protected $produkModel;
     protected $kategoriModel;
     protected $fotoProdukModel;
+    protected $ulasanModel;
 
     public function __construct()
     {
         $this->produkModel = new ProdukModel();
         $this->kategoriModel = new KategoriModel();
         $this->fotoProdukModel = new FotoProdukModel();
+        $this->ulasanModel = new UlasanModel();
     }
 
     public function index()
@@ -54,15 +57,40 @@ class Produk extends BaseController
                                            ->where('id !=', $id)
                                            ->limit(4)
                                            ->find();
+        
+        // Get photos for related products
+        foreach($relatedProducts as &$related) {
+            $related_foto = $this->produkModel->getFotoProduk($related['id']);
+            $related['foto'] = !empty($related_foto) ? $related_foto[0]['url_foto'] : 'img/products/product_placeholder_square_medium.jpg';
+        }
+
+        // Get reviews with user info
+        $ulasan = $this->ulasanModel->select('ulasan.*, users.nama_lengkap')
+                                   ->join('users', 'users.id = ulasan.user_id')
+                                   ->where('ulasan.produk_id', $id)
+                                   ->orderBy('ulasan.tanggal', 'DESC')
+                                   ->findAll();
+        
+        // Calculate average rating
+        $ratingData = $this->ulasanModel->getRataRataRating($id);
+        $rating = $ratingData['rating'] ?? 0;
+
+        // Get kategori info
+        $kategori = $this->kategoriModel->find($produk['kategori_id']);
 
         $data = [
             'title' => $produk['nama_produk'],
             'produk' => $produk,
             'fotos' => $fotos,
-            'relatedProducts' => $relatedProducts
+            'foto_produk' => $fotos,
+            'relatedProducts' => $relatedProducts,
+            'related_products' => $relatedProducts,
+            'ulasan' => $ulasan,
+            'rating' => $rating,
+            'kategori' => $kategori
         ];
 
-        return $this->render('home/produk/detail', $data);
+        return $this->render('produk/detail', $data);
     }
 
     public function kategori($id)

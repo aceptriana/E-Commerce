@@ -58,4 +58,14 @@ class UlasanModel extends Model
                     ->selectAvg('rating')  // Mengambil rata-rata rating dari produk
                     ->first();
     }
+
+    // Mendapatkan ulasan dengan informasi user
+    public function getUlasanWithUser(int $produk_id)
+    {
+        return $this->select('ulasan.*, users.nama_lengkap')
+                    ->join('users', 'users.id = ulasan.user_id')
+                    ->where('ulasan.produk_id', $produk_id)
+                    ->orderBy('ulasan.tanggal', 'DESC')
+                    ->findAll();
+    }
 }

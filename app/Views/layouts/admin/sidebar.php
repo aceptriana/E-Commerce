@@ -6,7 +6,7 @@
         <div class="sidebar-brand-icon rotate-n-15">
             <i class="fas fa-store"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">Toko Kalina</div>
+        <div class="sidebar-brand-text mx-3">Mantra Jaya Tani</div>
     </a>
 
     <!-- Divider -->

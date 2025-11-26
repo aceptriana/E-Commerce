@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Admin - Toko Kalina</title>
+    <title>Admin - Mantra Jaya Tani</title>
 
     <!-- Custom fonts for this template-->
     <link href="<?= base_url('sbadmin/vendor/fontawesome-free/css/all.min.css'); ?>" rel="stylesheet" type="text/css">

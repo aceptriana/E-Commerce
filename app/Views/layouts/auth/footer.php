@@ -49,11 +49,11 @@
                     <div class="follow_us">
                         <h5>Follow Us</h5>
                         <ul>
-                            <li><a href="hattps://www.facebook.com/demei.id"><i class="bi bi-facebook"></i></a></li>
+                            <li><a href="#"><i class="bi bi-facebook"></i></a></li>
                            
-                            <li><a href="https://www.instagram.com/demei.id/"><i class="bi bi-instagram"></i></a></li>
-                            <li><a href="https://www.tiktok.com/@demei.id"><i class="bi bi-tiktok"></i></a></li>
-                            <li><a href="https://wa.me/6285692831674?text=Hallo%20Admin%20Demei.id"><i class="bi bi-whatsapp"></i></a></li>
+                            <li><a href="#"><i class="bi bi-instagram"></i></a></li>
+                            <li><a href="#"><i class="bi bi-tiktok"></i></a></li>
+                            <li><a href="#"><i class="bi bi-whatsapp"></i></a></li>
                         </ul>
                     </div>
                 </div>
@@ -71,7 +71,7 @@
                 <ul class="additional_links">
                     <li><a href="<?= base_url('terms-and-conditions') ?>">Terms and conditions</a></li>
                     <li><a href="<?= base_url('privacy') ?>">Privacy</a></li>
-                    <li><span>© 2025 TOko Kalina</span></li>
+                    <li><span>© 2025 Mantra Jaya Tani</span></li>
                 </ul>
             </div>
         </div>

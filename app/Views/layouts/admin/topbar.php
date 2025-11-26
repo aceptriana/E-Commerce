@@ -32,7 +32,7 @@
                         <li class="nav-item dropdown no-arrow">
                         <a class="nav-link dropdown-toggle" href="<?= base_url('admin/profile') ?>" id="userDropdown" role="button"
    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-   <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin Toko Kalina</span>
+   <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin Mantra Jaya Tani</span>
    <img class="img-profile rounded-circle" src="<?= base_url('img/user.png') ?>">
 </a>
 

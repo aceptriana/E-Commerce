@@ -59,7 +59,7 @@ class Laporan extends BaseController
         
         // SHEET 1: LAPORAN PENJUALAN
         // Set header
-        $sheet->setCellValue('A1', 'LAPORAN PENJUALAN TOKO KALINA');
+        $sheet->setCellValue('A1', 'LAPORAN PENJUALAN Mantra Jaya Tani');
         $sheet->setCellValue('A2', 'Periode: ' . date('d-m-Y', strtotime($tanggal_mulai)) . ' s/d ' . date('d-m-Y', strtotime($tanggal_akhir)));
         $sheet->setCellValue('A4', 'No');
         $sheet->setCellValue('B4', 'ID Pesanan');
@@ -135,7 +135,7 @@ class Laporan extends BaseController
         $sheetTerlaris = $spreadsheet->getActiveSheet();
         
         // Set header
-        $sheetTerlaris->setCellValue('A1', 'PRODUK TERLARIS TOKO KALINA');
+        $sheetTerlaris->setCellValue('A1', 'PRODUK TERLARIS Mantra Jaya Tani');
         $sheetTerlaris->setCellValue('A2', 'Periode: ' . date('d-m-Y', strtotime($tanggal_mulai)) . ' s/d ' . date('d-m-Y', strtotime($tanggal_akhir)));
         $sheetTerlaris->setCellValue('A4', 'No');
         $sheetTerlaris->setCellValue('B4', 'Nama Produk');

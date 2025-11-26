@@ -96,7 +96,7 @@ class Dashboard extends BaseController
         $kategori_warna = $this->getKategoriWarna();
         
         $data = [
-            'title' => 'Dashboard Admin - Toko Kalina',
+            'title' => 'Dashboard Admin - Mantra Jaya Tani',
             'total_penjualan_bulan' => $total_penjualan_bulan['total'] ?? 0,
             'total_penjualan_tahun' => $total_penjualan_tahun['total'] ?? 0,
             'jumlah_pesanan_diproses' => $jumlah_pesanan_diproses,

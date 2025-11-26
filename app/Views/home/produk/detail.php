@@ -147,16 +147,7 @@
         <div class="container">
             <div class="tab-content" role="tablist">
                 <div id="pane-A" class="card tab-pane fade active show" role="tabpanel" aria-labelledby="tab-A">
-                    <div class="card-header" role="tab" id="heading-A">
-                        <h5 class="mb-0">
-                            <a class="collapsed" data-bs-toggle="collapse" href="#collapse-A" aria-expanded="false" aria-controls="collapse-A">
-                                Deskripsi
-                            </a>
-                        </h5>
-                    </div>
-
-                    <div id="collapse-A" class="collapse" role="tabpanel" aria-labelledby="heading-A">
-                        <div class="card-body">
+                    <div class="card-body">
                             <div class="row justify-content-between">
                                 <div class="col-lg-6">
                                     <h3>Detail</h3>
@@ -196,15 +187,7 @@
                 <!-- /TAB A -->
                 
                 <div id="pane-B" class="card tab-pane fade" role="tabpanel" aria-labelledby="tab-B">
-                    <div class="card-header" role="tab" id="heading-B">
-                        <h5 class="mb-0">
-                            <a class="collapsed" data-bs-toggle="collapse" href="#collapse-B" aria-expanded="false" aria-controls="collapse-B">
-                                Ulasan
-                            </a>
-                        </h5>
-                    </div>
-                    <div id="collapse-B" class="collapse" role="tabpanel" aria-labelledby="heading-B">
-                        <div class="card-body">
+                    <div class="card-body">
                             <?php if(isset($produk['ulasan']) && !empty($produk['ulasan'])): ?>
                                 <?php foreach($produk['ulasan'] as $ulasan): ?>
                                 <div class="row justify-content-between">

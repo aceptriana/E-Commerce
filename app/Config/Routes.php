@@ -11,7 +11,11 @@ $routes->get('/', 'Home::index');
 $routes->get('produk/detail/(:num)', 'Produk::detail/$1');
 $routes->post('cart/add', 'Cart::add');
 $routes->get('kategori/(:num)', 'Kategori::show/$1');
+
+// Ulasan (Review) routes
 $routes->get('ulasan/tulis/(:num)', 'Ulasan::tulis/$1');
+$routes->post('ulasan/simpan', 'Ulasan::simpan');
+$routes->get('ulasan/hapus/(:num)', 'Ulasan::hapus/$1');
 
 // Auth routes
 $routes->group('auth', function($routes) {

@@ -120,9 +120,7 @@
                                     </a>
                                 </div>
                             </li>
-                            <li>
-                                <a href="<?= base_url('my-wishlist.html') ?>" class="wishlist"><span>Favorit</span></a>
-                            </li>
+                         
                             <li>
                                 <div class="dropdown dropdown-access">
                                     <a href="<?= base_url('#') ?>" class="access_link"><span>Akun</span></a>
@@ -166,8 +164,10 @@
             </div>
 
             <div class="search_mob_wp">
-                <input type="text" class="form-control" placeholder="Cari di lebih dari 10.000 produk">
-                <input type="submit" class="btn_1 full-width" value="Cari">
+                <form action="<?= base_url('produk/search') ?>" method="get">
+                    <input type="text" name="keyword" class="form-control" placeholder="Cari produk..." value="<?= isset($keyword) ? esc($keyword) : '' ?>">
+                    <input type="submit" class="btn_1 full-width" value="Cari">
+                </form>
             </div>
         </div>
     </header>

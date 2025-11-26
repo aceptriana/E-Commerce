@@ -1,6 +1,5 @@
-<?= $this->extend('layouts/main'); ?>
+<?= view('layouts/home/header'); ?>
 
-<?= $this->section('content'); ?>
 <main class="bg_gray">
     <div class="container margin_30">
         <div class="page_header">
@@ -66,30 +65,8 @@
                             </div>
                         <?php endif; ?>
                         
-                        <div class="row">
-                            <label class="col-xl-7 col-lg-5 col-md-6 col-6"><strong>Ukuran</strong></label>
-                            <div class="col-xl-5 col-lg-5 col-md-6 col-6">
-                                <div class="custom-select-form">
-                                    <select class="wide" id="size">
-                                        <option value="S" selected>Small (S)</option>
-                                        <option value="M">Medium (M)</option>
-                                        <option value="L">Large (L)</option>
-                                        <option value="XL">Extra Large (XL)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <label class="col-xl-7 col-lg-5 col-md-6 col-6"><strong>Warna</strong></label>
-                            <div class="col-xl-5 col-lg-5 col-md-6 col-6 colors">
-                                <ul>
-                                    <li><a href="#0" class="color color_1 active"></a></li>
-                                    <li><a href="#0" class="color color_2"></a></li>
-                                    <li><a href="#0" class="color color_3"></a></li>
-                                    <li><a href="#0" class="color color_4"></a></li>
-                                </ul>
-                            </div>
-                        </div>
+                        <!-- Ukuran removed per request -->
+                        <!-- Warna removed per request -->
                         <div class="row">
                             <label class="col-xl-7 col-lg-5  col-md-6 col-6"><strong>Jumlah</strong></label>
                             <div class="col-xl-5 col-lg-5 col-md-6 col-6">
@@ -138,15 +115,7 @@
         <div class="container">
             <div class="tab-content" role="tablist">
                 <div id="pane-A" class="card tab-pane fade active show" role="tabpanel" aria-labelledby="tab-A">
-                    <div class="card-header" role="tab" id="heading-A">
-                        <h5 class="mb-0">
-                            <a class="collapsed" data-bs-toggle="collapse" href="#collapse-A" aria-expanded="false" aria-controls="collapse-A">
-                                Deskripsi
-                            </a>
-                        </h5>
-                    </div>
 
-                    <div id="collapse-A" class="collapse" role="tabpanel" aria-labelledby="heading-A">
                         <div class="card-body">
                             <div class="row justify-content-between">
                                 <div class="col-lg-6">
@@ -187,14 +156,6 @@
                 </div>
                 <!-- /TAB A -->
                 <div id="pane-B" class="card tab-pane fade" role="tabpanel" aria-labelledby="tab-B">
-                    <div class="card-header" role="tab" id="heading-B">
-                        <h5 class="mb-0">
-                            <a class="collapsed" data-bs-toggle="collapse" href="#collapse-B" aria-expanded="false" aria-controls="collapse-B">
-                                Ulasan
-                            </a>
-                        </h5>
-                    </div>
-                    <div id="collapse-B" class="collapse" role="tabpanel" aria-labelledby="heading-B">
                         <div class="card-body">
                             <?php if (!empty($ulasan)): ?>
                                 <?php $i = 0; ?>
@@ -269,11 +230,7 @@
                             <?php endif; ?>
                             <figure>
                                 <a href="<?= base_url('produk/detail/' . $related['id']); ?>">
-                                    <?php 
-                                    $related_photo = $this->fotoModel->where('produk_id', $related['id'])->orderBy('urutan', 'ASC')->first();
-                                    $photo_url = $related_photo ? $related_photo['url_foto'] : 'img/products/product_placeholder_square_medium.jpg';
-                                    ?>
-                                    <img class="owl-lazy" src="<?= base_url('img/products/product_placeholder_square_medium.jpg'); ?>" data-src="<?= base_url($photo_url); ?>" alt="<?= $related['nama_produk']; ?>">
+                                    <img class="owl-lazy" src="<?= base_url('img/products/product_placeholder_square_medium.jpg'); ?>" data-src="<?= base_url($related['foto']); ?>" alt="<?= $related['nama_produk']; ?>">
                                 </a>
                             </figure>
                             <a href="<?= base_url('produk/detail/' . $related['id']); ?>">
@@ -298,32 +255,21 @@
     </div>
     <!-- /bg_white -->
 </main>
-<?= $this->endSection(); ?>
 
 <?= $this->section('js'); ?>
 <script>
 function addToCart(product_id) {
     const quantity = document.getElementById('quantity').value;
-    const size = document.getElementById('size').value;
+    // No size selection available in this view
     
-    // Get selected color (if any)
-    let color = '';
-    const colorElements = document.querySelectorAll('.colors ul li a');
-    for (let i = 0; i < colorElements.length; i++) {
-        if (colorElements[i].classList.contains('active')) {
-            color = colorElements[i].getAttribute('class').replace('color ', '').replace(' active', '');
-            break;
-        }
-    }
+    // No color selection present in the detail view
     
     $.ajax({
         url: '<?= base_url('cart/add'); ?>',
         type: 'POST',
         data: {
             product_id: product_id,
-            quantity: quantity,
-            size: size,
-            color: color
+            quantity: quantity
         },
         success: function(response) {
             const data = JSON.parse(response);
@@ -376,15 +322,12 @@ $(document).ready(function() {
         }
     });
     
-    // Handle color selection
-    $('.colors a').on('click', function(e) {
-        e.preventDefault();
-        $('.colors a').removeClass('active');
-        $(this).addClass('active');
-    });
+    // No color selection handlers needed
     
-    // Initialize collapse for tabs
-    $('#collapse-A').collapse('show');
+    // No collapse required for tabs - content shows on tab click
 });
 </script>
+
 <?= $this->endSection(); ?>
+
+<?= view('layouts/home/footer'); ?>
