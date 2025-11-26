@@ -153,7 +153,7 @@
                         </div>
                         <div class="form-group">
                             <label>No. Telepon</label>
-                            <input type="text" class="form-control" id="telepon" name="telepon" value="<?= $user['telepon'] ?? '' ?>">
+                            <input type="tel" class="form-control" id="no_telepon" name="no_telepon" value="<?= $user['no_telepon'] ?? '' ?>">
                         </div>
                         <div class="form-group">
                             <label>Alamat Lengkap</label>
