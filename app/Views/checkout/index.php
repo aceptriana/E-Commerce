@@ -711,8 +711,11 @@ function showLoadingOverlay(message = 'Memproses...') {
         const overlayHtml = `
             <div id="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
                 <div class="card border-0 shadow-lg" style="max-width: 300px;">
-                    <div class="card-body text-center py-4">
-                        <div class="spinner-grow text-primary mb-3" style="width: 3rem; height: 3rem;" role="status" aria-hidden="true">
+                    <div class="card-body text-center py-4" role="status" aria-live="polite">
+                        <div class="dot-loader dot-loader-lg text-white mb-3" role="status" aria-hidden="true">
+                            <span class="dot" aria-hidden="true" style="background-color: white;"></span>
+                            <span class="dot" aria-hidden="true" style="background-color: white;"></span>
+                            <span class="dot" aria-hidden="true" style="background-color: white;"></span>
                             <span class="sr-only">Loading...</span>
                         </div>
                         <h6 class="text-primary mb-2">${message}</h6>
