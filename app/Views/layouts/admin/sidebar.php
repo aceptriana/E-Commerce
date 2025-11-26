@@ -41,8 +41,6 @@
             <span>Kategori</span></a>
     </li>
 
-    <!-- Divider -->
-    <hr class="sidebar-divider">
 
     <!-- Heading -->
     <div class="sidebar-heading">
@@ -63,6 +61,16 @@
         <a class="nav-link" href="<?= base_url('admin/laporan') ?>">
             <i class="fas fa-fw fa-file-alt"></i>
             <span>Laporan</span></a>
+    </li>
+
+        <!-- Divider -->
+    <hr class="sidebar-divider">
+    <!-- Logout (sidebar) -->
+    <li class="nav-item">
+        <a class="nav-link" href="<?= base_url('logout') ?>">
+            <i class="fas fa-fw fa-sign-out-alt"></i>
+            <span>Keluar</span>
+        </a>
     </li>
 
     <!-- Divider -->

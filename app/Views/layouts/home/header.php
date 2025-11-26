@@ -132,7 +132,7 @@
                                             <ul>
                                                 <li><a href="<?= base_url('profile') ?>"><i class="ti-user"></i>Profil Saya</a></li>
                                                 <li><a href="<?= base_url('checkout/history') ?>"><i class="ti-package"></i>Pesanan Saya</a></li>
-                                                <li><a href="<?= base_url('logout') ?>"><i class="ti-power-off"></i>Keluar</a></li>
+                                                <!-- Logout moved to sidebar (admin/pemilik) -->
                                             </ul>
                                         </div>
                                     <?php else: ?>

@@ -37,7 +37,7 @@
 }
 
 /* Button Loading States */
-            cityInput.attr('aria-busy', 'false');
+.btn_1[disabled], .btn_1.disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
@@ -60,7 +60,7 @@
     to {
         transform: translateX(0);
         opacity: 1;
-                    cityInput.attr('aria-busy', 'false');
+                    /* keep keyframes pure CSS */
 }
 
 /* Loading Overlay */
@@ -101,7 +101,7 @@
 
 .alert-warning {
     border-left: 4px solid #ffc107;
-                                    cityInput.attr('aria-busy', 'false');
+                                    /* ensure aria-busy will be toggled via JS */
 
 .alert-info {
     border-left: 4px solid #17a2b8;
@@ -138,7 +138,7 @@
                         </div>
                         <div class="form-group">
                             <label>No. Telepon</label>
-                    cityInput.attr('aria-busy', 'false');
+                            <input type="text" class="form-control" id="telepon" name="telepon" value="<?= $user['telepon'] ?? '' ?>">
                         </div>
                         <div class="form-group">
                             <label>Alamat Lengkap</label>
@@ -159,13 +159,11 @@
                         <label>Kota Tujuan</label>
                         <div style="position: relative;">
                             <div class="input-group">
-                                <input type="text" class="form-control" id="city-input" name="city_input" placeholder="Ketik nama kota..." required>
+                                <input type="text" class="form-control" id="city-input" name="city_input" placeholder="Ketik nama kota..." required aria-busy="false">
                                 <div class="input-group-append">
-            cityInput.attr('aria-busy', 'false');
-                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                            <span class="sr-only">Loading...</span>
-                                        </div>
-                                    </span>
+                                    <div class="spinner-border spinner-border-sm text-primary" id="city-loading" role="status" style="display:none;">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
                                 </div>
                             </div>
                             <input type="hidden" id="destination" name="destination">
@@ -323,7 +321,6 @@ $(document).ready(function() {
                     $('#city-loading').hide();
                     $('#city-search-loading').addClass('d-none');
                     cityInput.prop('disabled', false).attr('aria-busy', 'false');
-                        cityInput.attr('aria-busy', 'false');
                     
                     citySuggestions.empty();
                     
@@ -372,7 +369,6 @@ $(document).ready(function() {
                                     $('#city-loading').hide();
                                     $('#city-search-loading').addClass('d-none');
                                     cityInput.prop('disabled', false).attr('aria-busy', 'false');
-                                        cityInput.attr('aria-busy', 'false');
                                     
                                     // Reset shipping options when city changes
                                     $('#shipping-options-container').hide();
@@ -410,7 +406,6 @@ $(document).ready(function() {
                     $('#city-loading').hide();
                     $('#city-search-loading').addClass('d-none');
                     cityInput.prop('disabled', false).attr('aria-busy', 'false');
-                                    cityInput.attr('aria-busy', 'false');
                     
                     const errorItem = $('<div>')
                         .addClass('list-group-item')
