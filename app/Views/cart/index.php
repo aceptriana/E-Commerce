@@ -67,8 +67,7 @@
             <div class="row add_top_30 flex-sm-row-reverse cart_actions">
                 <div class="col-sm-4 text-end">
                     <button type="button" class="btn_1 gray" onclick="updateCart()">Update Cart</button>
-                    <button type="button" class="btn_1" id="checkout-selected">Lanjut ke Pembayaran (Dipilih)</button>
-                    <a href="<?= base_url('checkout') ?>" class="btn_1 full-width cart">Lanjut ke Pembayaran</a>
+                    <button type="button" class="btn_1 full-width cart" id="checkout-btn">Lanjut ke Pembayaran</button>
                 </div>
             </div>
             <!-- /cart_actions -->
@@ -107,24 +106,22 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Checkout selected items
-window.checkoutSelected = function() {
+// Checkout: either selected items or all items
+window.goToCheckout = function() {
     const ids = [];
     document.querySelectorAll('.select-item:checked').forEach(function(cb) {
         ids.push(cb.value);
     });
 
-    if (ids.length === 0) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Pilih produk',
-            text: 'Silakan pilih minimal 1 produk untuk checkout.'
-        });
+    // If there are selected ids, direct to checkout with the selected ids
+    if (ids.length > 0) {
+        const url = '<?= base_url('checkout') ?>?cart_ids=' + ids.join(',');
+        window.location.href = url;
         return;
     }
 
-    // Redirect to checkout with selected cart IDs (comma separated)
-    const url = '<?= base_url('checkout') ?>?cart_ids=' + ids.join(',');
-    window.location.href = url;
+    // If none are selected, go to the default checkout (all items)
+    window.location.href = '<?= base_url('checkout') ?>';
 };
 
 // Select all checkbox behavior
@@ -142,10 +139,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update select all state when individual item toggles
     function updateCheckoutButtonState() {
         const selected = document.querySelectorAll('.select-item:checked');
-        const checkoutBtn = document.getElementById('checkout-selected');
+        const checkoutBtn = document.getElementById('checkout-btn');
         if (checkoutBtn) {
-            checkoutBtn.disabled = selected.length === 0;
-            checkoutBtn.textContent = selected.length === 0 ? 'Lanjut ke Pembayaran (Dipilih)' : `Lanjut ke Pembayaran (Dipilih) (${selected.length})`;
+            // checkout always available; show count if items are selected
+            checkoutBtn.disabled = false;
+            checkoutBtn.textContent = selected.length === 0 ? 'Lanjut ke Pembayaran' : `Lanjut ke Pembayaran (${selected.length})`;
         }
     }
 
@@ -157,9 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
             updateCheckoutButtonState();
         });
     });
-    const checkoutSelectedBtn = document.getElementById('checkout-selected');
-    if (checkoutSelectedBtn) {
-        checkoutSelectedBtn.addEventListener('click', checkoutSelected);
+    const checkoutBtn = document.getElementById('checkout-btn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', goToCheckout);
         // initialize state
         updateCheckoutButtonState();
     }

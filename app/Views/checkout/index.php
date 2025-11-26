@@ -2,14 +2,34 @@
 
 <style>
 /* Enhanced Loading Styles */
-.loading-spinner {
-    animation: pulse 2s infinite;
+/* Spinner animation should be handled by Bootstrap's spinner; avoid animating text */
+.loading-spinner { }
+
+/* Friendly Dot Loader */
+.dot-loader { display: inline-flex; align-items: center; gap: 6px; }
+.dot-loader .dot { width: 8px; height: 8px; background-color: currentColor; border-radius: 50%; opacity: 0.9; animation: dotBounce 1s infinite ease-in-out; }
+.dot-loader .dot:nth-child(2) { animation-delay: 0.12s; }
+.dot-loader .dot:nth-child(3) { animation-delay: 0.24s; }
+.dot-loader-lg .dot { width: 18px; height: 18px; }
+
+@keyframes dotBounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.6; }
+    40% { transform: translateY(-6px); opacity: 1; }
 }
 
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
+/* Skeleton Loader */
+.skeleton { background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%); background-size: 400% 100%; animation: shimmer 1.2s linear infinite; }
+.skeleton-line { height: 12px; border-radius: 6px; margin-bottom: 8px; }
+.skeleton-card { padding: 12px; border-radius: 8px; }
+
+@keyframes shimmer {
+    0% { background-position: -400% 0; }
+    100% { background-position: 400% 0; }
+}
+
+/* Reduced motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    .dot-loader .dot, .skeleton { animation: none; }
 }
 
 /* City Suggestions Enhanced */
@@ -29,12 +49,7 @@
 }
 
 /* City Search Loading: match suggestion styling and appearance */
-#city-search-loading {
-    display: none;
-    padding: 12px 16px;
-    text-align: center;
-    border-radius: 8px;
-}
+#city-search-loading { display: none; }
 
 /* Button Loading States */
 .btn_1[disabled], .btn_1.disabled {
@@ -161,8 +176,11 @@
                             <div class="input-group">
                                 <input type="text" class="form-control" id="city-input" name="city_input" placeholder="Ketik nama kota..." required aria-busy="false">
                                 <div class="input-group-append">
-                                    <div class="spinner-border spinner-border-sm text-primary" id="city-loading" role="status" style="display:none;">
-                                        <span class="sr-only">Loading...</span>
+                                    <div class="dot-loader text-primary" id="city-loading" role="status" style="display:none;">
+                                        <span class="dot" aria-hidden="true"></span>
+                                        <span class="dot" aria-hidden="true"></span>
+                                        <span class="dot" aria-hidden="true"></span>
+                                        <span class="sr-only">Mencari Kota...</span>
                                     </div>
                                 </div>
                             </div>
@@ -173,10 +191,19 @@
                             </div>
                             
                             <!-- City Search Loading Overlay -->
-                            <div id="city-search-loading" class="list-group-item d-none" role="status" aria-live="polite" aria-atomic="true" style="position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 1001; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 16px; text-align: center;">
-                                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
-                                    <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
-                                    <div style="font-size:0.95rem; color:#6c757d;">Mencari kota...</div>
+                            <div id="city-search-loading" class="d-none" role="status" aria-live="polite" aria-atomic="true" style="position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 1001; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 16px; text-align: center;">
+                                <div class="card border-0 shadow-sm" style="margin: 0;">
+                                    <div class="card-body" style="padding: 12px;">
+                                        <div class="d-flex flex-column align-items-center">
+                                                    <div class="dot-loader dot-loader-lg text-primary mb-2" role="status" aria-hidden="true" style="--dot-color: #0d6efd;">
+                                                        <span class="dot" aria-hidden="true"></span>
+                                                        <span class="dot" aria-hidden="true"></span>
+                                                        <span class="dot" aria-hidden="true"></span>
+                                                    </div>
+                                                    <strong class="text-primary mb-1">Mencari Kota...</strong>
+                                                    <div class="text-muted small">Sedang mencari kota. Mohon tunggu...</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -184,10 +211,14 @@
                     
                     <button type="button" class="btn_1 full-width" id="check-shipping-btn" onclick="checkShipping()">
                         <span id="btn-text">Cek Biaya Pengiriman</span>
-                        <span id="btn-loading" style="display: none;">
-                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-                            Memproses...
-                        </span>
+                            <span id="btn-loading" style="display: none;">
+                                <span class="dot-loader text-white" role="status" aria-hidden="true">
+                                    <span class="dot" style="width:6px;height:6px;background-color:currentColor;opacity:0.9"></span>
+                                    <span class="dot" style="width:6px;height:6px;background-color:currentColor;opacity:0.9"></span>
+                                    <span class="dot" style="width:6px;height:6px;background-color:currentColor;opacity:0.9"></span>
+                                </span>
+                                Memproses...
+                            </span>
                     </button>
                     
                     <div id="shipping-options-container" style="display:none;" class="mt-3">
@@ -209,11 +240,12 @@
                     <div id="shipping-loading" style="display:none;" class="mt-3">
                         <div class="card border-0 shadow-sm">
                             <div class="card-body text-center py-4">
-                                <div class="loading-spinner mb-3">
-                                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                                        <span class="sr-only">Loading...</span>
-                                    </div>
-                                </div>
+                                        <div class="loading-spinner mb-3">
+                                            <div class="skeleton-card w-100" aria-hidden="true">
+                                                <div class="skeleton skeleton-line" style="height: 18px; width: 60%; margin: 8px auto 12px;"></div>
+                                                <div class="skeleton skeleton-line" style="height: 12px; width: 80%; margin: 6px auto;"></div>
+                                            </div>
+                                        </div>
                                 <h6 class="text-primary mb-2">Mencari Opsi Pengiriman</h6>
                                 <p class="text-muted mb-0">Sedang menghubungi layanan pengiriman...</p>
                                 <div class="progress mt-3" style="height: 4px;">
@@ -258,7 +290,11 @@
                         <button type="button" id="pay-button" class="btn_1 full-width" disabled>
                             <span id="pay-btn-text">Bayar Sekarang</span>
                             <span id="pay-btn-loading" style="display: none;">
-                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                <span class="dot-loader text-white me-2" role="status" aria-hidden="true">
+                                    <span class="dot" style="width:6px;height:6px;background-color:currentColor;opacity:0.9"></span>
+                                    <span class="dot" style="width:6px;height:6px;background-color:currentColor;opacity:0.9"></span>
+                                    <span class="dot" style="width:6px;height:6px;background-color:currentColor;opacity:0.9"></span>
+                                </span>
                                 Memproses Pembayaran...
                             </span>
                         </button>
@@ -676,7 +712,7 @@ function showLoadingOverlay(message = 'Memproses...') {
             <div id="loading-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
                 <div class="card border-0 shadow-lg" style="max-width: 300px;">
                     <div class="card-body text-center py-4">
-                        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                        <div class="spinner-grow text-primary mb-3" style="width: 3rem; height: 3rem;" role="status" aria-hidden="true">
                             <span class="sr-only">Loading...</span>
                         </div>
                         <h6 class="text-primary mb-2">${message}</h6>
