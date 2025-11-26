@@ -23,6 +23,7 @@
             <table class="table table-striped cart-list">
                 <thead>
                     <tr>
+                        <th><input type="checkbox" id="select_all"></th>
                         <th>Produk</th>
                         <th>Harga</th>
                         <th>Jumlah</th>
@@ -33,6 +34,9 @@
                 <tbody>
                     <?php foreach($cart_items as $item): ?>
                     <tr>
+                        <td>
+                            <input type="checkbox" class="select-item" value="<?= $item['id'] ?>">
+                        </td>
                         <td>
                             <div class="thumb_cart">
                                 <img src="<?= base_url($item['gambar'] ?? 'img/products/product_placeholder_square_small.jpg') ?>" class="lazy" alt="<?= $item['produk_nama'] ?>" style="width: 80px; height: 80px; object-fit: cover;">
@@ -63,6 +67,7 @@
             <div class="row add_top_30 flex-sm-row-reverse cart_actions">
                 <div class="col-sm-4 text-end">
                     <button type="button" class="btn_1 gray" onclick="updateCart()">Update Cart</button>
+                    <button type="button" class="btn_1" id="checkout-selected">Lanjut ke Pembayaran (Dipilih)</button>
                     <a href="<?= base_url('checkout') ?>" class="btn_1 full-width cart">Lanjut ke Pembayaran</a>
                 </div>
             </div>
@@ -97,6 +102,49 @@ document.addEventListener('DOMContentLoaded', function() {
             if (value > 1) {
                 input.value = value - 1;
             }
+        });
+    });
+});
+
+// Checkout selected items
+window.checkoutSelected = function() {
+    const ids = [];
+    document.querySelectorAll('.select-item:checked').forEach(function(cb) {
+        ids.push(cb.value);
+    });
+
+    if (ids.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Pilih produk',
+            text: 'Silakan pilih minimal 1 produk untuk checkout.'
+        });
+        return;
+    }
+
+    // Redirect to checkout with selected cart IDs (comma separated)
+    const url = '<?= base_url('checkout') ?>?cart_ids=' + ids.join(',');
+    window.location.href = url;
+};
+
+// Select all checkbox behavior
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('select_all');
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            const checked = this.checked;
+            document.querySelectorAll('.select-item').forEach(function(cb) {
+                cb.checked = checked;
+            });
+        });
+    }
+
+    // Update select all state when individual item toggles
+    document.querySelectorAll('.select-item').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            const all = document.querySelectorAll('.select-item');
+            const anyUnchecked = Array.from(all).some(item => !item.checked);
+            if (selectAll) selectAll.checked = !anyUnchecked;
         });
     });
 });

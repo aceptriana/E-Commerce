@@ -182,7 +182,17 @@ class Checkout extends BaseController
         }
 
         $user_id = session()->get('user_id');
-        $cart_items = $this->keranjangModel->getCartWithProducts($user_id);
+
+        // Check if we're only checking out a subset of cart items
+        $cart_ids_param = $this->request->getGet('cart_ids');
+        $selected_cart_ids = null;
+        if ($cart_ids_param) {
+            $ids = array_filter(array_map('intval', explode(',', $cart_ids_param)));
+            $cart_items = $this->keranjangModel->getCartWithProductsByIds($user_id, $ids);
+            $selected_cart_ids = implode(',', array_column($cart_items, 'id'));
+        } else {
+            $cart_items = $this->keranjangModel->getCartWithProducts($user_id);
+        }
         
         if (empty($cart_items)) {
             return redirect()->to('/keranjang')->with('error', 'Keranjang belanja kosong');
@@ -206,6 +216,9 @@ class Checkout extends BaseController
             'total_weight' => $total_weight,
             'midtrans_client_key' => $this->midtransClientKey
         ];
+
+        // include selected cart ids in data so checkout form can post them
+        $data['selected_cart_ids'] = $selected_cart_ids;
 
         return view('checkout/index', $data);
     }
@@ -600,7 +613,14 @@ class Checkout extends BaseController
 
         // Hitung total
         $user_id = session()->get('user_id');
-        $cart_items = $this->keranjangModel->getCartWithProducts($user_id);
+        $selected_cart_ids = $this->request->getPost('selected_cart_ids');
+        $ids = [];
+        if ($selected_cart_ids) {
+            $ids = array_filter(array_map('intval', explode(',', $selected_cart_ids)));
+            $cart_items = $this->keranjangModel->getCartWithProductsByIds($user_id, $ids);
+        } else {
+            $cart_items = $this->keranjangModel->getCartWithProducts($user_id);
+        }
         $subtotal = 0;
         foreach ($cart_items as $item) {
             $subtotal += $item['harga'] * $item['quantity'];
@@ -628,7 +648,7 @@ class Checkout extends BaseController
         ];
 
         $item_details = [];
-        foreach ($cart_items as $item) {
+            foreach ($cart_items as $item) {
             $item_details[] = [
                 'id' => $item['produk_id'],
                 'price' => $item['harga'],
@@ -698,6 +718,11 @@ class Checkout extends BaseController
                     // Removed 'subtotal' as it's not allowed in model
                 ];
                 $this->detailPesananModel->insert($detailPesananData);
+            }
+
+            // Hapus item yang diproses dari keranjang
+            if (!empty($ids)) {
+                $this->keranjangModel->whereIn('id', $ids)->where('user_id', $user_id)->delete();
             }
 
             // Simpan data pengiriman
@@ -795,7 +820,12 @@ class Checkout extends BaseController
             if ($status === 'berhasil') {
                 $pesanan = $this->pesananModel->find($pembayaran['pesanan_id']);
                 if ($pesanan) {
-                    $this->keranjangModel->where('user_id', $pesanan['user_id'])->delete();
+                    // Hapus hanya item yang terkait dengan pesanan ini dari keranjang
+                    $orderDetails = $this->detailPesananModel->where('pesanan_id', $pesanan['id'])->findAll();
+                    $productIds = array_column($orderDetails, 'produk_id');
+                    if (!empty($productIds)) {
+                        $this->keranjangModel->where('user_id', $pesanan['user_id'])->whereIn('produk_id', $productIds)->delete();
+                    }
                 }
             }
 

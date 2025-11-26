@@ -119,6 +119,7 @@
                 <div class="step first">
                     <h3>1. Informasi Pengiriman</h3>
                     <form id="shipping-form">
+                        <input type="hidden" id="selected_cart_ids" name="selected_cart_ids" value="<?= $selected_cart_ids ?? '' ?>">
                         <div class="form-group">
                             <label>Nama Lengkap</label>
                             <input type="text" class="form-control" id="nama" name="nama_lengkap" value="<?= $user['nama_lengkap'] ?? '' ?>" required>
