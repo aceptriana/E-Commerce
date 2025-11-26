@@ -147,6 +147,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (selectAll) selectAll.checked = !anyUnchecked;
         });
     });
+    const checkoutSelectedBtn = document.getElementById('checkout-selected');
+    if (checkoutSelectedBtn) {
+        checkoutSelectedBtn.addEventListener('click', checkoutSelected);
+    }
 });
 
 // Make functions globally available

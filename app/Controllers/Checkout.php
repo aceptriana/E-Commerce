@@ -621,6 +621,13 @@ class Checkout extends BaseController
         } else {
             $cart_items = $this->keranjangModel->getCartWithProducts($user_id);
         }
+        if (empty($cart_items)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Tidak ada item yang diproses. Pastikan produk masih tersedia.'
+            ]);
+        }
+
         $subtotal = 0;
         foreach ($cart_items as $item) {
             $subtotal += $item['harga'] * $item['quantity'];
