@@ -54,6 +54,13 @@
             <span>Pesanan</span></a>
     </li>
 
+    <!-- Nav Item - Retur -->
+    <li class="nav-item <?= (strpos(current_url(), base_url('admin/returns')) !== false) ? 'active' : '' ?>">
+        <a class="nav-link" href="<?= base_url('admin/returns') ?>">
+            <i class="fas fa-fw fa-undo"></i>
+            <span>Retur</span></a>
+    </li>
+
     <div class="sidebar-heading">
         Laporan
     </div>

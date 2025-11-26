@@ -135,6 +135,20 @@
                         <p><strong>Metode Pembayaran:</strong> <?= ucfirst($order['payment_type']) ?></p>
                     <?php endif; ?>
                     <p><strong>Tanggal Pesanan:</strong> <?= date('d/m/Y H:i', strtotime($order['tanggal_pesanan'])) ?></p>
+                    <?php if (!empty($return_request)): ?>
+                        <div class="alert alert-warning mt-2">
+                            <strong>Permintaan Retur:</strong> <span class="badge bg-<?= $return_request['status'] === 'requested' ? 'warning' : ($return_request['status'] === 'approved' ? 'success' : 'danger') ?> ms-1"><?= ucfirst($return_request['status']) ?></span>
+                            <div class="small mt-1">Alasan: <?= esc($return_request['reason']) ?></div>
+                            <?php if (!empty($return_request['admin_note'])): ?>
+                                <div class="small text-muted mt-1">Catatan Admin: <?= esc($return_request['admin_note']) ?></div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (in_array($order['status'], ['selesai', 'delivered'])): ?>
+                        <div class="d-grid gap-2">
+                            <a href="<?= base_url('returns/create/'.$order['id']) ?>" class="btn_1">Minta Retur / Pengembalian</a>
+                        </div>
+                    <?php endif; ?>
                     
                 </div>
             </div>

@@ -40,6 +40,14 @@ $routes->group('profile', ['filter' => 'auth'], function($routes) {
     $routes->post('change-password', 'Profile::changePassword');
 });
 
+// Returns (Retur) routes
+$routes->group('returns', ['filter' => 'auth'], function($routes) {
+    $routes->get('/', 'Returns::index');
+    $routes->get('create/(:num)', 'Returns::create/$1');
+    $routes->get('create', 'Returns::create');
+    $routes->post('store', 'Returns::store');
+});
+
 // Favorit (Wishlist) routes
 $routes->group('favorit', ['filter' => 'auth'], function($routes) {
 	$routes->get('/', 'Favorit::index');
@@ -85,6 +93,10 @@ $routes->group('admin', ['filter' => 'auth'], function($routes) {
 
     // Pesanan Routes
     $routes->get('pesanan', 'Admin\Pesanan::index');
+        // Admin Returns (Retur) management
+        $routes->get('returns', 'Admin\Returns::index');
+        $routes->post('returns/approve/(:num)', 'Admin\Returns::approve/$1');
+        $routes->post('returns/reject/(:num)', 'Admin\Returns::reject/$1');
     $routes->get('pesanan/detail/(:num)', 'Admin\Pesanan::detail/$1');
     $routes->get('pesanan/update-status/(:num)', 'Admin\Pesanan::updateStatusForm/$1');
     $routes->post('pesanan/update-status/(:num)', 'Admin\Pesanan::updateStatus/$1');

@@ -939,12 +939,19 @@ class Checkout extends BaseController
             $order['shipping_description'] = $pengiriman['estimasi_pengiriman'];
         }
 
+        // Load any existing return request for this order
+        $returnModel = new \App\Models\ReturnModel();
+        $returnRequest = $returnModel->where('order_id', $order['id'])->first();
+
         $data = [
             'order' => $order,
             'order_details' => $order_details,
             'pengiriman' => $pengiriman,
             'title' => 'Detail Order #' . $external_id
         ];
+
+        // Attach return request if exists
+        $data['return_request'] = $returnRequest;
 
         return view('checkout/order_detail', $data);
     }

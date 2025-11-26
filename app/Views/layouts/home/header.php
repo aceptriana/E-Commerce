@@ -132,6 +132,7 @@
                                             <ul>
                                                 <li><a href="<?= base_url('profile') ?>"><i class="ti-user"></i>Profil Saya</a></li>
                                                 <li><a href="<?= base_url('checkout/history') ?>"><i class="ti-package"></i>Pesanan Saya</a></li>
+                                                <li><a href="<?= base_url('returns') ?>"><i class="fas fa-undo me-1"></i>Retur Saya</a></li>
                                                 <!-- Logout moved to sidebar (admin/pemilik) -->
                                             </ul>
                                         </div>
