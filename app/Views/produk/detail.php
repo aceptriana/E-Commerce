@@ -85,7 +85,7 @@
                             </div>
                             <div class="col-lg-5 col-md-6">
                                 <div class="btn_add_to_cart">
-                                    <a href="#0" class="btn_1" onclick="addToCart(<?= $produk['id']; ?>)">Tambah ke Keranjang</a>
+                                    <a href="#0" class="btn_1" onclick="addToCart(<?= $produk['id']; ?>); return false;">Tambah ke Keranjang</a>
                                 </div>
                             </div>
                         </div>
@@ -242,7 +242,7 @@
                             <ul>
                                 <li><a href="#0" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke favorit"><i class="ti-heart"></i><span>Tambah ke favorit</span></a></li>
                                 <li><a href="#0" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Bandingkan"><i class="ti-control-shuffle"></i><span>Bandingkan</span></a></li>
-                                <li><a href="#0" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke keranjang" onclick="addToCart(<?= $related['id']; ?>)"><i class="ti-shopping-cart"></i><span>Tambah ke keranjang</span></a></li>
+                                <li><a href="#0" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke keranjang" onclick="addToCart(<?= $related['id']; ?>); return false;"><i class="ti-shopping-cart"></i><span>Tambah ke keranjang</span></a></li>
                             </ul>
                         </div>
                         <!-- /grid_item -->
@@ -267,20 +267,25 @@ function addToCart(product_id) {
     $.ajax({
         url: '<?= base_url('cart/add'); ?>',
         type: 'POST',
+        dataType: 'json',
         data: {
             product_id: product_id,
             quantity: quantity
         },
-        success: function(response) {
-            const data = JSON.parse(response);
-            if (data.status === 'success') {
+        success: function(data) {
+            if (data && data.status === 'success') {
                 // Update cart icon count
                 $('#cart-count').text(data.cart_count);
-                
-                // Show success message
-                alert('Produk berhasil ditambahkan ke keranjang!');
+
+                // Redirect to cart page
+                window.location.href = data.redirect || '<?= base_url('cart'); ?>';
             } else {
-                alert(data.message);
+                // If not logged in or other error, show message
+                if (data && data.message) alert(data.message);
+                // Optional: if response contains redirect (like to login), redirect
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                }
             }
         },
         error: function() {

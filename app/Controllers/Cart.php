@@ -18,17 +18,24 @@ class Cart extends BaseController
 
     public function add()
     {
-        // Check if user is logged in
-        if (!session()->get('logged_in')) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Silakan login terlebih dahulu untuk menambahkan produk ke keranjang'
-            ]);
-        }
-
         // Get product ID and quantity from request
         $product_id = $this->request->getPost('product_id');
-        $quantity = $this->request->getPost('quantity');
+        $quantity = intval($this->request->getPost('quantity')) > 0 ? intval($this->request->getPost('quantity')) : 1;
+
+        // Check if user is logged in
+        if (!session()->get('logged_in')) {
+            // If the call is AJAX, return JSON with redirect to login
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Silakan login terlebih dahulu untuk menambahkan produk ke keranjang',
+                    'redirect' => base_url('auth?redirect=produk/detail/' . $product_id)
+                ]);
+            }
+
+            // Otherwise redirect to login page
+            return redirect()->to('/auth?redirect=produk/detail/' . $product_id);
+        }
 
         // Validate product exists
         $product = $this->produkModel->find($product_id);
@@ -65,7 +72,18 @@ class Cart extends BaseController
             ]);
         }
 
-        // Redirect to cart page
+        // If request is AJAX, return JSON response that UI expects
+        if ($this->request->isAJAX()) {
+            $cart_count = $this->keranjangModel->where('user_id', $user_id)->countAllResults();
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Produk berhasil ditambahkan ke keranjang',
+                'cart_count' => $cart_count,
+                'redirect' => base_url('cart')
+            ]);
+        }
+
+        // Otherwise redirect to cart for normal requests
         return redirect()->to('/cart');
     }
 
