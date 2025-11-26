@@ -140,16 +140,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Update select all state when individual item toggles
+    function updateCheckoutButtonState() {
+        const selected = document.querySelectorAll('.select-item:checked');
+        const checkoutBtn = document.getElementById('checkout-selected');
+        if (checkoutBtn) {
+            checkoutBtn.disabled = selected.length === 0;
+            checkoutBtn.textContent = selected.length === 0 ? 'Lanjut ke Pembayaran (Dipilih)' : `Lanjut ke Pembayaran (Dipilih) (${selected.length})`;
+        }
+    }
+
     document.querySelectorAll('.select-item').forEach(function(cb) {
         cb.addEventListener('change', function() {
             const all = document.querySelectorAll('.select-item');
             const anyUnchecked = Array.from(all).some(item => !item.checked);
             if (selectAll) selectAll.checked = !anyUnchecked;
+            updateCheckoutButtonState();
         });
     });
     const checkoutSelectedBtn = document.getElementById('checkout-selected');
     if (checkoutSelectedBtn) {
         checkoutSelectedBtn.addEventListener('click', checkoutSelected);
+        // initialize state
+        updateCheckoutButtonState();
     }
 });
 

@@ -28,8 +28,16 @@
     border-bottom: none;
 }
 
+/* City Search Loading: match suggestion styling and appearance */
+#city-search-loading {
+    display: none;
+    padding: 12px 16px;
+    text-align: center;
+    border-radius: 8px;
+}
+
 /* Button Loading States */
-.btn_1:disabled {
+            cityInput.attr('aria-busy', 'false');
     opacity: 0.6;
     cursor: not-allowed;
 }
@@ -52,7 +60,7 @@
     to {
         transform: translateX(0);
         opacity: 1;
-    }
+                    cityInput.attr('aria-busy', 'false');
 }
 
 /* Loading Overlay */
@@ -93,7 +101,7 @@
 
 .alert-warning {
     border-left: 4px solid #ffc107;
-}
+                                    cityInput.attr('aria-busy', 'false');
 
 .alert-info {
     border-left: 4px solid #17a2b8;
@@ -130,7 +138,7 @@
                         </div>
                         <div class="form-group">
                             <label>No. Telepon</label>
-                            <input type="text" class="form-control" id="no_telepon" name="no_telepon" value="<?= $user['no_telepon'] ?? '' ?>" required>
+                    cityInput.attr('aria-busy', 'false');
                         </div>
                         <div class="form-group">
                             <label>Alamat Lengkap</label>
@@ -153,7 +161,7 @@
                             <div class="input-group">
                                 <input type="text" class="form-control" id="city-input" name="city_input" placeholder="Ketik nama kota..." required>
                                 <div class="input-group-append">
-                                    <span class="input-group-text" id="city-loading" style="display: none;">
+            cityInput.attr('aria-busy', 'false');
                                         <div class="spinner-border spinner-border-sm text-primary" role="status">
                                             <span class="sr-only">Loading...</span>
                                         </div>
@@ -167,12 +175,10 @@
                             </div>
                             
                             <!-- City Search Loading Overlay -->
-                            <div id="city-search-loading" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1001; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                                <div class="p-3 text-center">
-                                    <div class="spinner-border text-primary mb-2" role="status">
-                                        <span class="sr-only">Loading...</span>
-                                    </div>
-                                    <p class="mb-0 text-muted">Mencari kota...</p>
+                            <div id="city-search-loading" class="list-group-item d-none" role="status" aria-live="polite" aria-atomic="true" style="position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 1001; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 16px; text-align: center;">
+                                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+                                    <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+                                    <div style="font-size:0.95rem; color:#6c757d;">Mencari kota...</div>
                                 </div>
                             </div>
                         </div>
@@ -291,14 +297,16 @@ $(document).ready(function() {
         
         if (query.length < 2) {
             citySuggestions.hide();
-            $('#city-search-loading').hide();
+            $('#city-search-loading').addClass('d-none');
             $('#city-loading').hide();
+            cityInput.prop('disabled', false).attr('aria-busy', 'false');
             return;
         }
 
         // Show loading indicators
         $('#city-loading').show();
-        $('#city-search-loading').show();
+        $('#city-search-loading').removeClass('d-none');
+            cityInput.attr('aria-busy', 'true');
         citySuggestions.hide();
 
         typingTimer = setTimeout(function() {
@@ -313,7 +321,9 @@ $(document).ready(function() {
                     
                     // Hide loading indicators
                     $('#city-loading').hide();
-                    $('#city-search-loading').hide();
+                    $('#city-search-loading').addClass('d-none');
+                    cityInput.prop('disabled', false).attr('aria-busy', 'false');
+                        cityInput.attr('aria-busy', 'false');
                     
                     citySuggestions.empty();
                     
@@ -359,6 +369,10 @@ $(document).ready(function() {
                                     cityInput.val(city.type + ' ' + city.city_name);
                                     destinationInput.val(city.city_id);
                                     citySuggestions.hide();
+                                    $('#city-loading').hide();
+                                    $('#city-search-loading').addClass('d-none');
+                                    cityInput.prop('disabled', false).attr('aria-busy', 'false');
+                                        cityInput.attr('aria-busy', 'false');
                                     
                                     // Reset shipping options when city changes
                                     $('#shipping-options-container').hide();
@@ -394,7 +408,9 @@ $(document).ready(function() {
                     
                     // Hide loading indicators
                     $('#city-loading').hide();
-                    $('#city-search-loading').hide();
+                    $('#city-search-loading').addClass('d-none');
+                    cityInput.prop('disabled', false).attr('aria-busy', 'false');
+                                    cityInput.attr('aria-busy', 'false');
                     
                     const errorItem = $('<div>')
                         .addClass('list-group-item')
@@ -415,6 +431,10 @@ $(document).ready(function() {
     $(document).on('click', function(e) {
         if (!cityInput.is(e.target) && !citySuggestions.is(e.target) && !citySuggestions.has(e.target).length) {
             citySuggestions.hide();
+            $('#city-search-loading').addClass('d-none');
+            $('#city-loading').hide();
+            cityInput.prop('disabled', false).attr('aria-busy', 'false');
+                    cityInput.attr('aria-busy', 'false');
         }
     });
 
