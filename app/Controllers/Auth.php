@@ -113,6 +113,46 @@ class Auth extends BaseController
         return redirect()->to('/auth')->with('success', 'Anda telah berhasil keluar.');
     }
 
+    // Show forgot password page - also available as part of login via JS toggle
+    public function forgotPassword()
+    {
+        $data = ['title' => 'Lupa Kata Sandi'];
+        return view('auth/forgot', $data);
+    }
+
+    // Reset password without OTP: user submits email and new password
+    public function resetPassword()
+    {
+        // Validate input
+        $rules = [
+            'email' => 'required|valid_email',
+            'password' => 'required|min_length[6]',
+            'password_confirm' => 'matches[password]'
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('error', $this->validator->getErrors());
+        }
+
+        $email = $this->request->getPost('email');
+        $password = $this->request->getPost('password');
+
+        $userModel = new UserModel();
+        $user = $userModel->where('email', $email)->first();
+
+        if (!$user) {
+            return redirect()->back()->withInput()->with('error', 'Email tidak ditemukan.');
+        }
+
+        // Hash password and update
+        $userModel->update($user['id'], [
+            'password' => password_hash($password, PASSWORD_DEFAULT),
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        return redirect()->to('/auth')->with('success', 'Kata sandi berhasil diubah. Silakan masuk dengan kata sandi baru Anda.');
+    }
+
     public function redirectByRole()
     {
         // Redirect user based on role

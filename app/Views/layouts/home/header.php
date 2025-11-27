@@ -27,6 +27,8 @@
 
     <!-- CSS KUSTOM -->
     <link href="<?= base_url('css/custom.css') ?>" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
 </head>
 
 <body>
@@ -129,12 +131,12 @@
                                             <div class="text-center" style="padding: 10px; border-bottom: 1px solid #ededed;">
                                                 <strong><?= esc(session()->get('nama')) ?></strong>
                                             </div>
-                                            <ul>
-                                                <li><a href="<?= base_url('profile') ?>"><i class="ti-user"></i>Profil Saya</a></li>
-                                                <li><a href="<?= base_url('checkout/history') ?>"><i class="ti-package"></i>Pesanan Saya</a></li>
-                                                <li><a href="<?= base_url('returns') ?>"><i class="fas fa-undo me-1"></i>Retur Saya</a></li>
-                                                <!-- Logout moved to sidebar (admin/pemilik) -->
-                                            </ul>
+                                                <ul>
+                                                    <li><a href="<?= base_url('profile') ?>"><i class="ti-user"></i> Profil Saya</a></li>
+                                                    <li><a href="<?= base_url('checkout/history') ?>"><i class="ti-package"></i> Pesanan Saya</a></li>
+                                                    <li><a href="<?= base_url('returns') ?>"><i class="fas fa-undo me-1"></i> Return Saya</a></li>
+                                                    <li><a href="<?= base_url('logout') ?>"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+                                                </ul>
                                         </div>
                                     <?php else: ?>
                                         <div class="dropdown-menu">

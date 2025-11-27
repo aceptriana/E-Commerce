@@ -56,12 +56,21 @@
                             </div>
                             <div class="text-center"><input type="submit" value="Masuk" class="btn_1 full-width"></div>
                         </form>
-                        <div id="forgot_pw">
-                            <div class="form-group">
-                                <input type="email" class="form-control" name="email_forgot" id="email_forgot" placeholder="Masukkan email Anda">
-                            </div>
-                            <p>Kata sandi baru akan segera dikirim.</p>
-                            <div class="text-center"><input type="submit" value="Reset Kata Sandi" class="btn_1"></div>
+                        <div id="forgot_pw" style="display:none;">
+                            <form action="<?= base_url('/auth/resetPassword'); ?>" method="post">
+                                <?= csrf_field() ?>
+                                <div class="form-group">
+                                    <input type="email" class="form-control" name="email" id="email_forgot" placeholder="Masukkan email Anda" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" class="form-control" name="password" id="password_forgot" placeholder="Kata Sandi Baru" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" class="form-control" name="password_confirm" id="password_confirm_forgot" placeholder="Konfirmasi Kata Sandi" required>
+                                </div>
+                                <p>Masukkan email dan kata sandi baru. Jika email terdaftar, kata sandi akan diubah.</p>
+                                <div class="text-center"><input type="submit" value="Ubah Kata Sandi" class="btn_1"></div>
+                            </form>
                         </div>
                     </div>
                     <!-- /form_container -->
@@ -107,11 +116,4 @@
 
 <?= view('layouts/home/footer'); ?>
 
-<script>
-    $(document).ready(function() {
-        // Forgot password functionality
-        $("#forgot").click(function() {
-            $("#forgot_pw").slideToggle("300");
-        });
-    });
-</script>
+<!-- Remove duplicate forgot handler: main.js handles the toggle -->
