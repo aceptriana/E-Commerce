@@ -168,7 +168,12 @@ $routes->get('checkout/pay/(:any)', 'Checkout::pay/$1');
 $routes->get('checkout/pay-xendit/(:any)', 'Checkout::payXendit/$1');
 $routes->get('checkout/history', 'Checkout::history');
 // User confirm receipt
+// Primary confirm route
 $routes->post('checkout/confirm/(:any)', 'Checkout::confirmReceipt/$1');
+// Accept OPTIONS preflight on the same URI if the browser checks it
+$routes->options('checkout/confirm/(:any)', 'Checkout::confirmOptions/$1');
+// Dev debug route to inspect method & headers
+$routes->match(['GET', 'POST', 'OPTIONS'], 'checkout/confirm-debug/(:any)', 'Checkout::confirmDebug/$1');
 
 // Development-only debug route (shows order and product stock info)
 $routes->get('checkout/debug-order/(:num)', 'Checkout::debugOrder/$1');

@@ -959,7 +959,10 @@ class Checkout extends BaseController
     // User confirms that order has been received
     public function confirmReceipt($external_id = null)
     {
-        if (!session()->get('logged_in')) {
+        log_message('info', 'confirmReceipt called with external_id: ' . ($external_id ?? 'NULL'));
+        $isLoggedIn = session()->get('logged_in');
+        log_message('info', 'confirmReceipt session logged_in: ' . ($isLoggedIn ? 'true' : 'false'));
+        if (!$isLoggedIn) {
             return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu');
         }
 
@@ -968,7 +971,13 @@ class Checkout extends BaseController
         }
 
         // Only allow POST to change state
-        if ($this->request->getMethod() !== 'post') {
+        $method = $this->request->getMethod();
+        log_message('info', 'confirmReceipt request method: ' . $method);
+        if ($method !== 'post') {
+            log_message('warning', 'confirmReceipt invalid method: ' . $method);
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(405)->setJSON(['status' => 'error', 'message' => 'Invalid request method']);
+            }
             return redirect()->back()->with('error', 'Invalid request method');
         }
 
@@ -976,22 +985,54 @@ class Checkout extends BaseController
 
         // Find pembayaran and pesanan
         $pembayaran = $this->pembayaranModel->where('external_id', $external_id)->first();
+        log_message('info', 'confirmReceipt search by external_id: ' . ($external_id ?? 'null') . ' found:' . ($pembayaran['id'] ?? 'none'));
+        // Fallback: if we can't find by external_id, accept pesanan_id from POST
         if (!$pembayaran) {
+            $pesanan_id_from_post = $this->request->getPost('pesanan_id');
+            if ($pesanan_id_from_post) {
+                log_message('info', 'confirmReceipt trying fallback by pesanan_id: ' . $pesanan_id_from_post);
+                $pembayaran = $this->pembayaranModel->where('pesanan_id', intval($pesanan_id_from_post))->first();
+            }
+        }
+        log_message('info', 'confirmReceipt found pembayaran id: ' . ($pembayaran['id'] ?? 'none'));
+        $acceptHeader = $this->request->getHeaderLine('Accept') ?? '';
+        $isAjaxRequest = $this->request->isAJAX() || stripos($acceptHeader, 'application/json') !== false;
+        log_message('info', 'confirmReceipt isAjaxRequest: ' . ($isAjaxRequest ? 'true' : 'false'));
+        if (!$pembayaran) {
+            log_message('warning', 'confirmReceipt pembayaran not found for external_id: ' . $external_id);
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(404)->setJSON(['status' => 'error', 'message' => 'Pembayaran tidak ditemukan']);
+            }
             return redirect()->back()->with('error', 'Pembayaran tidak ditemukan');
         }
 
         $pesanan = $this->pesananModel->find($pembayaran['pesanan_id']);
         if (!$pesanan) {
+            log_message('warning', 'confirmReceipt pesanan not found for pembayaran id: ' . ($pembayaran['id'] ?? 'unknown'));
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(404)->setJSON(['status' => 'error', 'message' => 'Pesanan tidak ditemukan']);
+            }
             return redirect()->back()->with('error', 'Pesanan tidak ditemukan');
         }
 
         // Ensure the logged-in user is the owner
+        log_message('info', 'confirmReceipt pesanan user_id: ' . ($pesanan['user_id'] ?? 'null') . ' request user_id: ' . $user_id);
         if ($pesanan['user_id'] != $user_id) {
+            log_message('warning', 'confirmReceipt access denied. pesanan.user_id: ' . ($pesanan['user_id'] ?? 'null') . ' session user_id: ' . $user_id);
+            $acceptHeader = $this->request->getHeaderLine('Accept') ?? '';
+            $isAjaxRequest = $this->request->isAJAX() || stripos($acceptHeader, 'application/json') !== false;
+            if ($isAjaxRequest) {
+                return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Akses ditolak']);
+            }
             return redirect()->back()->with('error', 'Akses ditolak');
         }
 
         // Only allow confirmation when order is in "dikirim" state
         if ($pesanan['status'] !== 'dikirim') {
+            log_message('warning', 'confirmReceipt wrong status: ' . ($pesanan['status'] ?? 'null') . ' for pesanan ' . $pesanan['id']);
+            if ($isAjaxRequest ?? $this->request->isAJAX()) {
+                return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Pesanan tidak dalam status yang dapat dikonfirmasi']);
+            }
             return redirect()->back()->with('error', 'Pesanan tidak dalam status yang dapat dikonfirmasi');
         }
 
@@ -1004,6 +1045,7 @@ class Checkout extends BaseController
         ];
 
         $this->pesananModel->update($pesanan['id'], $updateData);
+        log_message('info', 'confirmReceipt update pesanan done: ' . $pesanan['id']);
 
         // Also update pengiriman status to "sampai" if exists
         $pengirimanModel = new \App\Models\PengirimanModel();
@@ -1015,7 +1057,43 @@ class Checkout extends BaseController
         // Log for admin visibility
         log_message('info', 'Order ' . $pesanan['id'] . ' confirmed received by user ' . $user_id);
 
+        if ($isAjaxRequest ?? $this->request->isAJAX()) {
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Terima kasih, pesanan telah dikonfirmasi.']);
+        }
         return redirect()->to('/checkout/order/' . $external_id)->with('success', 'Terima kasih, pesanan telah dikonfirmasi.');
+    }
+
+    // Dev-debug: return details about the request to help debug method issues
+    public function confirmDebug($external_id = null)
+    {
+        // Only in development or admin
+        if (ENVIRONMENT !== 'development' && session()->get('role') !== 'admin') {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Access denied']);
+        }
+
+        $method = $this->request->getMethod();
+        $isAjax = $this->request->isAJAX();
+        $post = $this->request->getPost();
+        $headers = [];
+        foreach ($this->request->getHeaders() as $name => $header) {
+            $headers[$name] = $header->getValue();
+        }
+
+        log_message('info', 'confirmDebug: method=' . $method . ' isAjax=' . ($isAjax ? 'true' : 'false') . ' external_id=' . ($external_id ?? 'null'));
+
+        return $this->response->setJSON([
+            'method' => $method,
+            'isAjax' => $isAjax,
+            'post' => $post,
+            'headers' => $headers
+        ]);
+    }
+
+    // Accept OPTIONS for routes that might be preflighted
+    public function confirmOptions($external_id = null)
+    {
+        // Return OK for preflight
+        return $this->response->setStatusCode(200)->setJSON(['status' => 'ok']);
     }
 
     // Method untuk bayar ulang pesanan yang belum dibayar

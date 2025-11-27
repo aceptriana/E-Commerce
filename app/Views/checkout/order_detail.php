@@ -20,6 +20,11 @@
                     <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
                 </div>
             <?php endif; ?>
+            <?php if (session()->getFlashdata('error')): ?>
+                <div class="col-12">
+                    <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
+                </div>
+            <?php endif; ?>
             <div class="col-lg-8">
                 <div class="box_general">
                     <h4>Detail Produk</h4>
@@ -95,8 +100,9 @@
 
                                     <?php if ($order['status'] === 'dikirim'): ?>
                                         <div class="mt-3">
-                                            <form method="post" action="<?= base_url('checkout/confirm/'.$order['external_id']) ?>">
+                                            <form id="confirmReceiptForm" method="post" action="<?= base_url('checkout/confirm/'.$order['external_id']) ?>">
                                                 <?= csrf_field() ?>
+                                                <input type="hidden" name="pesanan_id" value="<?= esc($order['id']) ?>">
                                                 <button type="submit" class="btn btn-success w-100">Konfirmasi Penerimaan</button>
                                             </form>
                                         </div>
@@ -176,3 +182,83 @@
 </main>
 
 <?= view('layouts/home/footer'); ?> 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('confirmReceiptForm');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const btn = form.querySelector('button[type=submit]');
+            btn.disabled = true;
+            btn.innerText = 'Memproses...';
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams(new FormData(form)),
+                credentials: 'same-origin'
+            }).then(async (response) => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.indexOf('application/json') !== -1) {
+                    const json = await response.json();
+                    if (json.status === 'success') {
+                        // Show a SweetAlert success message and reload
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: json.message || 'Pesanan dikonfirmasi',
+                                confirmButtonText: 'OK'
+                            }).then(() => { location.reload(); });
+                        } else {
+                            alert(json.message || 'Pesanan dikonfirmasi');
+                            location.reload();
+                        }
+                    } else {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: json.message || 'Gagal mengonfirmasi pesanan',
+                                confirmButtonText: 'Tutup'
+                            });
+                        } else {
+                            alert(json.message || 'Gagal mengonfirmasi pesanan');
+                        }
+                    }
+                    return;
+                }
+                // Fallback: treat as HTML
+                const text = await response.text();
+                try {
+                    if (text) {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(text, 'text/html');
+                        const main = doc.querySelector('main');
+                        if (main) {
+                            document.querySelector('main').innerHTML = main.innerHTML;
+                        }
+                    }
+                } catch (err) {
+                    console.error('Failed to handle response', err);
+                    alert('Terjadi kesalahan saat memproses respons');
+                }
+            }).catch(err => {
+                console.error(err);
+                alert('Terjadi kesalahan saat mengirim permintaan.');
+            }).finally(() => {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'Konfirmasi Penerimaan';
+                }
+            });
+        });
+    }
+});
+</script>
