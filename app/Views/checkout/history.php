@@ -74,7 +74,11 @@
                                             <td>
                                                 <a href="<?= base_url('checkout/order/' . ($order['external_id'] ?? $order['id'])) ?>" class="btn_1 small">Detail</a>
                                                 <?php if ($order['status'] === 'menunggu_pembayaran'): ?>
-                                                    <a href="<?= base_url('checkout/pay/' . ($order['external_id'] ?? $order['id'])) ?>" class="btn btn-sm btn-success ms-1">Bayar</a>
+                                                    <?php if(isset($order['metode_pembayaran']) && $order['metode_pembayaran'] === 'xendit'): ?>
+                                                        <a href="<?= base_url('checkout/pay-xendit/' . ($order['external_id'] ?? $order['id'])) ?>" class="btn btn-sm btn-success ms-1">Bayar</a>
+                                                    <?php else: ?>
+                                                        <a href="<?= base_url('checkout/pay/' . ($order['external_id'] ?? $order['id'])) ?>" class="btn btn-sm btn-success ms-1">Bayar</a>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
                                                 <?php if (in_array($order['status'], ['selesai', 'dikirim', 'delivered'])): ?>
                                                     <a href="<?= base_url('returns/create/' . $order['id']) ?>" class="btn btn-sm btn-outline-danger ms-1">Minta Retur</a>

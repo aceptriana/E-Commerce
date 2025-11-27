@@ -160,6 +160,7 @@ $routes->get('checkout/test-rajaongkir', 'Checkout::testRajaOngkir'); // Test AP
 $routes->get('checkout/failed', 'Checkout::failed');
 $routes->get('checkout/order/(:any)', 'Checkout::order/$1');
 $routes->get('checkout/pay/(:any)', 'Checkout::pay/$1');
+$routes->get('checkout/pay-xendit/(:any)', 'Checkout::payXendit/$1');
 $routes->get('checkout/history', 'Checkout::history');
 
 // Error pages

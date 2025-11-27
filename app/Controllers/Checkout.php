@@ -994,9 +994,24 @@ class Checkout extends BaseController
         $pengirimanModel = new \App\Models\PengirimanModel();
         $pengiriman = $pengirimanModel->where('pesanan_id', $order['id'])->first();
 
+        // Generate a unique Midtrans order id (avoid duplicate external_id errors)
+        $midtransOrderId = $external_id . '-' . time();
+
+        // Update pembayaran.external_id to the new midtrans order id so later notifications match
+        $pembayaranModel = new \App\Models\PembayaranModel();
+        $existingPembayaran = $pembayaranModel->where('external_id', $external_id)->first();
+        if ($existingPembayaran) {
+            $pembayaranModel->update($existingPembayaran['id'], [
+                'external_id' => $midtransOrderId,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+            // set transaction external id to point to the newly updated id
+            $external_id = $midtransOrderId;
+        }
+
         // Siapkan data untuk Midtrans
         $transaction_details = [
-            'order_id' => $external_id,
+            'order_id' => $external_id, // now guaranteed unique for this attempt
             'gross_amount' => $order['total']
         ];
 
@@ -1053,6 +1068,78 @@ class Checkout extends BaseController
         }
     }
 
+    // Method untuk bayar ulang via Xendit (invoice)
+    public function payXendit($external_id = null)
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu');
+        }
+
+        if (!$external_id) {
+            return redirect()->to('/checkout/history')->with('error', 'Order tidak ditemukan');
+        }
+
+        $user_id = session()->get('user_id');
+        $order = $this->pesananModel->select('pesanan.*, pembayaran.external_id, pembayaran.status as payment_status, pembayaran.metode_pembayaran, users.nama_lengkap as nama, users.email, users.no_telepon, users.alamat')
+                                 ->join('pembayaran', 'pembayaran.pesanan_id = pesanan.id', 'left')
+                                 ->join('users', 'users.id = pesanan.user_id', 'left')
+                                 ->where('pembayaran.external_id', $external_id)
+                                 ->where('pesanan.user_id', $user_id)
+                                 ->first();
+
+        if (!$order) {
+            return redirect()->to('/checkout/history')->with('error', 'Order tidak ditemukan');
+        }
+
+        if ($order['status'] !== 'menunggu_pembayaran') {
+            return redirect()->to('/checkout/history')->with('error', 'Pesanan ini sudah dibayar atau tidak dapat dibayar ulang');
+        }
+
+        // Try to create Xendit invoice
+        $xenditKey = getenv('XENDIT_API_KEY') ?: null;
+        if (!$xenditKey) {
+            return redirect()->to('/checkout/history')->with('error', 'Xendit API key tidak ditemukan.');
+        }
+
+        $payload = [
+            'external_id' => $external_id,
+            'amount' => (int)$order['total'],
+            'payer_email' => $order['email'] ?? '',
+            'description' => 'Pembayaran Order ' . $external_id,
+            'success_redirect_url' => base_url('checkout/success'),
+            'failure_redirect_url' => base_url('checkout/failed')
+        ];
+
+        $ch = curl_init('https://api.xendit.co/v2/invoices');
+        curl_setopt($ch, CURLOPT_USERPWD, $xenditKey . ':');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
+        $info = curl_getinfo($ch);
+        curl_close($ch);
+
+        if ($info['http_code'] === 201 || $info['http_code'] === 200) {
+            $resp = json_decode($response, true);
+            if (isset($resp['invoice_url'])) {
+                // Update payment method to xendit
+                $pembayaranModel = new \App\Models\PembayaranModel();
+                $pembayaran = $pembayaranModel->where('external_id', $external_id)->first();
+                if ($pembayaran) {
+                    $pembayaranModel->update($pembayaran['id'], [
+                        'metode_pembayaran' => 'xendit',
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+                return redirect()->to($resp['invoice_url']);
+            }
+        }
+
+        // If failed, show error
+        log_message('error', 'Xendit Pay Error: ' . $response);
+        return redirect()->to('/checkout/history')->with('error', 'Gagal memproses pembayaran via Xendit: ' . ($response ?? 'Unknown error'));
+    }
+
     // Method untuk riwayat pesanan
     public function history()
     {
@@ -1061,7 +1148,7 @@ class Checkout extends BaseController
         }
 
         $user_id = session()->get('user_id');
-        $orders = $this->pesananModel->select('pesanan.*, pembayaran.external_id')
+        $orders = $this->pesananModel->select('pesanan.*, pembayaran.external_id, pembayaran.metode_pembayaran')
                                   ->join('pembayaran', 'pembayaran.pesanan_id = pesanan.id', 'left')
                                   ->where('pesanan.user_id', $user_id)
                                   ->orderBy('pesanan.tanggal_pesanan', 'DESC')
