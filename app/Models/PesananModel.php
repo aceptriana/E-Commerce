@@ -31,10 +31,14 @@ class PesananModel extends Model
 
         try {
             // 1. Update status pesanan menjadi 'diproses'
-            $this->update($pesanan_id, [
-                'status' => 'diproses',
-                'tanggal_update' => date('Y-m-d H:i:s')
-            ]);
+            $updateData = [
+                'status' => 'diproses'
+            ];
+            $db = \Config\Database::connect();
+            if ($db->fieldExists('tanggal_update', 'pesanan')) {
+                $updateData['tanggal_update'] = date('Y-m-d H:i:s');
+            }
+            $this->update($pesanan_id, $updateData);
 
             // 2. Ambil detail pesanan
             $detailModel = new \App\Models\DetailPesananModel();
@@ -87,10 +91,14 @@ class PesananModel extends Model
             $order_status = $this->mapPaymentToOrderStatus($payment_status);
 
             // Update status pesanan
-            $this->update($pesanan_id, [
-                'status' => $order_status,
-                'tanggal_update' => date('Y-m-d H:i:s')
-            ]);
+            $updateData = [
+                'status' => $order_status
+            ];
+            $db = \Config\Database::connect();
+            if ($db->fieldExists('tanggal_update', 'pesanan')) {
+                $updateData['tanggal_update'] = date('Y-m-d H:i:s');
+            }
+            $this->update($pesanan_id, $updateData);
 
             // Update pembayaran jika ada data pembayaran
             if (!empty($payment_data)) {

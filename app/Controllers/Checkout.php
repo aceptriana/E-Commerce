@@ -971,9 +971,10 @@ class Checkout extends BaseController
         }
 
         // Only allow POST to change state
-        $method = $this->request->getMethod();
+        // Use uppercase method for consistent comparison
+        $method = $this->request->getMethod(true);
         log_message('info', 'confirmReceipt request method: ' . $method);
-        if ($method !== 'post') {
+        if ($method !== 'POST') {
             log_message('warning', 'confirmReceipt invalid method: ' . $method);
             if ($this->request->isAJAX()) {
                 return $this->response->setStatusCode(405)->setJSON(['status' => 'error', 'message' => 'Invalid request method']);
@@ -1037,12 +1038,15 @@ class Checkout extends BaseController
         }
 
         // Update pesanan
+        $db = \Config\Database::connect();
         $updateData = [
             'status' => 'selesai',
             'konfirmasi_oleh' => $user_id,
-            'tanggal_konfirmasi' => date('Y-m-d H:i:s'),
-            'tanggal_update' => date('Y-m-d H:i:s')
+            'tanggal_konfirmasi' => date('Y-m-d H:i:s')
         ];
+        if ($db->fieldExists('tanggal_update', 'pesanan')) {
+            $updateData['tanggal_update'] = date('Y-m-d H:i:s');
+        }
 
         $this->pesananModel->update($pesanan['id'], $updateData);
         log_message('info', 'confirmReceipt update pesanan done: ' . $pesanan['id']);
