@@ -285,4 +285,23 @@ class Produk extends BaseController
 
         return $this->render('home/produk/search', $data);
     }
+
+    // Dev-only endpoint to return product stock info
+    public function debugStock($id = null)
+    {
+        if (ENVIRONMENT !== 'development' && session()->get('role') !== 'admin') {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Access denied']);
+        }
+
+        if (!$id) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Product ID required']);
+        }
+
+        $produk = $this->produkModel->find($id);
+        if (!$produk) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Produk tidak ditemukan']);
+        }
+
+        return $this->response->setJSON(['status' => 'success', 'produk' => $produk]);
+    }
 }

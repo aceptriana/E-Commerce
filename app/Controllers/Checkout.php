@@ -1162,6 +1162,179 @@ class Checkout extends BaseController
         return view('checkout/history', $data);
     }
 
+    // Dev-only method to inspect order details and product stocks
+    public function debugOrder($pesanan_id = null)
+    {
+        if (ENVIRONMENT !== 'development' && session()->get('role') !== 'admin') {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Access denied']);
+        }
+
+        if (!$pesanan_id) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Pesanan ID diperlukan']);
+        }
+
+        $pesanan = $this->pesananModel->find($pesanan_id);
+        if (!$pesanan) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Pesanan tidak ditemukan']);
+        }
+
+        $detailModel = new DetailPesananModel();
+        $produkModel = new ProdukModel();
+        $details = $detailModel->where('pesanan_id', $pesanan_id)->findAll();
+        $pembayaranModel = new \App\Models\PembayaranModel();
+        $pembayaran = $pembayaranModel->where('pesanan_id', $pesanan_id)->first();
+
+        $outputDetails = [];
+        foreach ($details as $d) {
+            $produk = $produkModel->find($d['produk_id']);
+            $outputDetails[] = [
+                'produk_id' => $d['produk_id'],
+                'nama_produk' => $produk['nama_produk'] ?? null,
+                'quantity' => $d['jumlah'],
+                'stock_before' => $produk['stok'] ?? null,
+            ];
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'pesanan' => $pesanan,
+            'pembayaran' => $pembayaran,
+            'details' => $outputDetails
+        ]);
+    }
+
+    // Dev-only: create a test order (pesanan) for a single product to verify stock reduction
+    public function debugCreateOrder($product_id = null, $quantity = 1)
+    {
+        if (ENVIRONMENT !== 'development' && session()->get('role') !== 'admin') {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Access denied']);
+        }
+
+        if (!$product_id) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Product ID diperlukan']);
+        }
+
+        $produkModel = new ProdukModel();
+        $produk = $produkModel->find($product_id);
+        if (!$produk) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Produk tidak ditemukan']);
+        }
+
+        // Create a pesanan
+        $pesananData = [
+            'user_id' => 1,
+            'tanggal_pesanan' => date('Y-m-d H:i:s'),
+            'status' => 'menunggu_pembayaran',
+            'total' => $produk['harga'] * $quantity,
+            'alamat_pengiriman' => 'Debug Address'
+        ];
+        $pesanan_id = $this->pesananModel->insert($pesananData);
+
+        // Create pembayaran
+        $pembayaranModel = new \App\Models\PembayaranModel();
+        $pembayaranId = $pembayaranModel->insert([
+            'pesanan_id' => $pesanan_id,
+            'status' => 'pending',
+            'metode_pembayaran' => 'simulated',
+            'total_bayar' => $produk['harga'] * $quantity,
+            'waktu_bayar' => date('Y-m-d H:i:s')
+        ]);
+
+        // Add detail pesanan
+        $detailModel = new DetailPesananModel();
+        $detailModel->insert([
+            'pesanan_id' => $pesanan_id,
+            'produk_id' => $product_id,
+            'harga_satuan' => $produk['harga'],
+            'jumlah' => $quantity
+        ]);
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'pesanan_id' => $pesanan_id,
+            'pembayaran_id' => $pembayaranId
+        ]);
+    }
+
+    // Admin/dev only: show pending payments available for simulation
+    public function simulateIndex()
+    {
+        // Allow only in development or admin
+        if (ENVIRONMENT !== 'development' && session()->get('role') !== 'admin') {
+            return redirect()->to('/')->with('error', 'Access denied');
+        }
+
+        $pembayaranModel = new \App\Models\PembayaranModel();
+        $pendingPayments = $pembayaranModel->where('status', 'pending')->findAll();
+
+        $data = [
+            'title' => 'Simulasi Webhook Midtrans',
+            'pendingPayments' => $pendingPayments
+        ];
+
+        return view('checkout/simulate', $data);
+    }
+
+    // Admin/dev only: simulate a Midtrans notification for an existing external_id
+    public function simulateNotification()
+    {
+        // Allow only in development or admin
+        if (ENVIRONMENT !== 'development' && session()->get('role') !== 'admin') {
+            return redirect()->to('/')->with('error', 'Access denied');
+        }
+
+        $external_id = $this->request->getPost('external_id');
+        $pesanan_id = $this->request->getPost('pesanan_id');
+
+        if (empty($external_id) && empty($pesanan_id)) {
+            return redirect()->back()->with('error', 'External ID atau Pesanan ID diperlukan');
+        }
+
+        $pembayaranModel = new \App\Models\PembayaranModel();
+        $pembayaran = null;
+        if (!empty($external_id)) {
+            $pembayaran = $pembayaranModel->where('external_id', $external_id)->first();
+        }
+
+        if (!$pembayaran && !empty($pesanan_id)) {
+            $pembayaran = $pembayaranModel->where('pesanan_id', $pesanan_id)->first();
+        }
+
+        if (!$pembayaran) {
+            return redirect()->back()->with('error', 'Pembayaran tidak ditemukan');
+        }
+
+        // Find the order id
+        $pesanan_id = $pembayaran['pesanan_id'];
+
+        // Ensure there is an external id for bookkeeping; if none, assign a simulation id
+        $usedExternalId = $pembayaran['external_id'] ?: ('SIM-' . $pesanan_id . '-' . time());
+        if (empty($pembayaran['external_id'])) {
+            $pembayaranModel->update($pembayaran['id'], ['external_id' => $usedExternalId, 'updated_at' => date('Y-m-d H:i:s')]);
+            $pembayaran['external_id'] = $usedExternalId;
+        }
+        log_message('info', 'SimulateNotification: using external_id ' . $usedExternalId . ' for pesanan ' . $pesanan_id);
+
+        // Prepare fake payment data similar to Midtrans notification
+        $payment_data = [
+            'status' => 'berhasil',
+            'waktu_bayar' => date('Y-m-d H:i:s'),
+            'transaction_id' => 'SIM-' . time(),
+            'payment_type' => 'simulated',
+            'va_number' => null,
+            'status_code' => '200',
+            'status_message' => 'Simulated success',
+            'external_id' => $usedExternalId
+        ];
+
+        $result = $this->pesananModel->updateOrderStatus($pesanan_id, 'berhasil', $payment_data);
+        if (!$result) {
+            return redirect()->back()->with('error', 'Gagal mengupdate status pesanan');
+        }
+
+        return redirect()->back()->with('success', 'Simulasi notifikasi Midtrans berhasil: pesanan diperbarui menjadi berhasil');
+    }
+
     // Method untuk test API RajaOngkir
     public function testRajaOngkir()
     {

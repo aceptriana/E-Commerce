@@ -140,6 +140,8 @@ $routes->get('produk', 'Produk::index');
 $routes->get('produk/search', 'Produk::search');
 $routes->get('produk/kategori/(:num)', 'Produk::kategori/$1');
 $routes->get('produk/preorder', 'Produk::preorder');
+// Dev-only: debug stock
+$routes->get('produk/debug-stock/(:num)', 'Produk::debugStock/$1');
 
 // Cart Routes
 $routes->get('cart', 'Cart::index');
@@ -156,12 +158,20 @@ $routes->post('checkout/process', 'Checkout::process');
 $routes->post('checkout/notification', 'Checkout::notification');
 $routes->get('checkout/success', 'Checkout::success');
 $routes->get('checkout/pending', 'Checkout::pending');
+// Checkout simulate webhook (dev/admin only)
+$routes->get('checkout/simulate', 'Checkout::simulateIndex');
+$routes->post('checkout/simulate', 'Checkout::simulateNotification');
 $routes->get('checkout/test-rajaongkir', 'Checkout::testRajaOngkir'); // Test API RajaOngkir
 $routes->get('checkout/failed', 'Checkout::failed');
 $routes->get('checkout/order/(:any)', 'Checkout::order/$1');
 $routes->get('checkout/pay/(:any)', 'Checkout::pay/$1');
 $routes->get('checkout/pay-xendit/(:any)', 'Checkout::payXendit/$1');
 $routes->get('checkout/history', 'Checkout::history');
+
+// Development-only debug route (shows order and product stock info)
+$routes->get('checkout/debug-order/(:num)', 'Checkout::debugOrder/$1');
+// Dev-only: create a sample order for testing stock reduction
+$routes->get('checkout/debug-create-order/(:num)/(:num)', 'Checkout::debugCreateOrder/$1/$2');
 
 // Error pages
 $routes->get('403', 'ErrorPages::forbidden');
