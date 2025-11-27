@@ -8,6 +8,7 @@ use CodeIgniter\Router\RouteCollection;
 
 // Default route
 $routes->get('/', 'Home::index');
+$routes->get('bantuan', 'Bantuan::index');
 $routes->get('produk/detail/(:num)', 'Produk::detail/$1');
 $routes->post('cart/add', 'Cart::add');
 $routes->get('kategori/(:num)', 'Kategori::show/$1');
@@ -158,6 +159,7 @@ $routes->get('checkout/pending', 'Checkout::pending');
 $routes->get('checkout/test-rajaongkir', 'Checkout::testRajaOngkir'); // Test API RajaOngkir
 $routes->get('checkout/failed', 'Checkout::failed');
 $routes->get('checkout/order/(:any)', 'Checkout::order/$1');
+$routes->get('checkout/pay/(:any)', 'Checkout::pay/$1');
 $routes->get('checkout/history', 'Checkout::history');
 
 // Error pages

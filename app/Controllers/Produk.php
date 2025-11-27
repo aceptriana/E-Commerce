@@ -24,7 +24,30 @@ class Produk extends BaseController
 
     public function index()
     {
-        $produk = $this->produkModel->getProdukWithKategori();
+        // Get filter parameters
+        $selectedKategori = $this->request->getGet('kategori');
+        $selectedHarga = $this->request->getGet('harga');
+        
+        // Start building the query
+        $produkQuery = $this->produkModel->select('produk.*, kategori.nama_kategori')
+                                        ->join('kategori', 'kategori.id = produk.kategori_id');
+        
+        // Apply category filter
+        if ($selectedKategori) {
+            $kategoriIds = explode(',', $selectedKategori);
+            $produkQuery->whereIn('produk.kategori_id', $kategoriIds);
+        }
+        
+        // Apply price filter
+        if ($selectedHarga) {
+            if ($selectedHarga === 'termurah') {
+                $produkQuery->where('produk.harga <=', 100000);
+            } elseif ($selectedHarga === 'termahal') {
+                $produkQuery->where('produk.harga >', 100000);
+            }
+        }
+        
+        $produk = $produkQuery->findAll();
         
         // Get photos for each product
         foreach($produk as &$item) {
@@ -32,10 +55,24 @@ class Produk extends BaseController
             $item['foto'] = !empty($foto) ? $foto[0]['url_foto'] : 'img/products/product_placeholder_square_medium.jpg';
         }
 
+        // Get all categories with product count
+        $all_kategori = $this->kategoriModel->findAll();
+        foreach($all_kategori as &$kat) {
+            $kat['jumlah_produk'] = $this->produkModel->where('kategori_id', $kat['id'])->countAllResults();
+        }
+        
+        // Calculate price filter counts
+        $jumlah_termurah = $this->produkModel->where('harga <=', 100000)->countAllResults();
+        $jumlah_termahal = $this->produkModel->where('harga >', 100000)->countAllResults();
+
         $data = [
             'title' => 'Semua Produk',
             'produk' => $produk,
-            'kategori' => $this->kategoriModel->findAll()
+            'kategori' => $all_kategori,
+            'jumlah_termurah' => $jumlah_termurah,
+            'jumlah_termahal' => $jumlah_termahal,
+            'selected_kategori' => $selectedKategori ? explode(',', $selectedKategori) : [],
+            'selected_harga' => $selectedHarga
         ];
 
         return $this->render('home/produk/index', $data);
@@ -101,7 +138,31 @@ class Produk extends BaseController
             return redirect()->to(base_url('produk'))->with('error', 'Kategori tidak ditemukan');
         }
 
-        $produk = $this->produkModel->where('kategori_id', $id)->findAll();
+        // Get filter parameters
+        $selectedKategori = $this->request->getGet('kategori');
+        $selectedHarga = $this->request->getGet('harga');
+        
+        // Start building the query
+        $produkQuery = $this->produkModel->select('produk.*, kategori.nama_kategori')
+                                        ->join('kategori', 'kategori.id = produk.kategori_id')
+                                        ->where('produk.kategori_id', $id);
+        
+        // Apply additional category filter (for cross-category filtering)
+        if ($selectedKategori) {
+            $kategoriIds = explode(',', $selectedKategori);
+            $produkQuery->whereIn('produk.kategori_id', $kategoriIds);
+        }
+        
+        // Apply price filter
+        if ($selectedHarga) {
+            if ($selectedHarga === 'termurah') {
+                $produkQuery->where('produk.harga <=', 100000);
+            } elseif ($selectedHarga === 'termahal') {
+                $produkQuery->where('produk.harga >', 100000);
+            }
+        }
+        
+        $produk = $produkQuery->findAll();
         
         // Get photos for each product
         foreach($produk as &$item) {
@@ -114,12 +175,20 @@ class Produk extends BaseController
         foreach($all_kategori as &$kat) {
             $kat['jumlah_produk'] = $this->produkModel->where('kategori_id', $kat['id'])->countAllResults();
         }
+        
+        // Calculate price filter counts (within this category)
+        $jumlah_termurah = $this->produkModel->where('kategori_id', $id)->where('harga <=', 100000)->countAllResults();
+        $jumlah_termahal = $this->produkModel->where('kategori_id', $id)->where('harga >', 100000)->countAllResults();
 
         $data = [
             'title' => $kategori['nama_kategori'],
             'kategori' => $kategori,
             'all_kategori' => $all_kategori,
-            'produk' => $produk
+            'produk' => $produk,
+            'jumlah_termurah' => $jumlah_termurah,
+            'jumlah_termahal' => $jumlah_termahal,
+            'selected_kategori' => $selectedKategori ? explode(',', $selectedKategori) : [],
+            'selected_harga' => $selectedHarga
         ];
 
         return $this->render('home/produk/kategori', $data);
@@ -151,11 +220,34 @@ class Produk extends BaseController
             return redirect()->to(base_url('produk'));
         }
 
-        $produk = $this->produkModel->select('produk.*, kategori.nama_kategori')
-                                  ->join('kategori', 'kategori.id = produk.kategori_id')
-                                  ->like('produk.nama_produk', $keyword)
-                                  ->orLike('produk.deskripsi', $keyword)
-                                  ->findAll();
+        // Get filter parameters
+        $selectedKategori = $this->request->getGet('kategori');
+        $selectedHarga = $this->request->getGet('harga');
+        
+        // Start building the query
+        $produkQuery = $this->produkModel->select('produk.*, kategori.nama_kategori')
+                                        ->join('kategori', 'kategori.id = produk.kategori_id')
+                                        ->groupStart()
+                                        ->like('produk.nama_produk', $keyword)
+                                        ->orLike('produk.deskripsi', $keyword)
+                                        ->groupEnd();
+        
+        // Apply category filter
+        if ($selectedKategori) {
+            $kategoriIds = explode(',', $selectedKategori);
+            $produkQuery->whereIn('produk.kategori_id', $kategoriIds);
+        }
+        
+        // Apply price filter
+        if ($selectedHarga) {
+            if ($selectedHarga === 'termurah') {
+                $produkQuery->where('produk.harga <=', 100000);
+            } elseif ($selectedHarga === 'termahal') {
+                $produkQuery->where('produk.harga >', 100000);
+            }
+        }
+        
+        $produk = $produkQuery->findAll();
         
         // Get photos for each product
         foreach($produk as &$item) {
@@ -163,11 +255,32 @@ class Produk extends BaseController
             $item['foto'] = !empty($foto) ? $foto[0]['url_foto'] : 'img/products/product_placeholder_square_medium.jpg';
         }
 
+        // Get all categories with product count
+        $all_kategori = $this->kategoriModel->findAll();
+        foreach($all_kategori as &$kat) {
+            $kat['jumlah_produk'] = $this->produkModel->where('kategori_id', $kat['id'])->countAllResults();
+        }
+        
+        // Calculate price filter counts (for search results)
+        $baseQuery = $this->produkModel->select('produk.*, kategori.nama_kategori')
+                                      ->join('kategori', 'kategori.id = produk.kategori_id')
+                                      ->groupStart()
+                                      ->like('produk.nama_produk', $keyword)
+                                      ->orLike('produk.deskripsi', $keyword)
+                                      ->groupEnd();
+        
+        $jumlah_termurah = (clone $baseQuery)->where('produk.harga <=', 100000)->countAllResults();
+        $jumlah_termahal = (clone $baseQuery)->where('produk.harga >', 100000)->countAllResults();
+
         $data = [
             'title' => 'Hasil Pencarian: ' . $keyword,
             'produk' => $produk,
             'keyword' => $keyword,
-            'kategori' => $this->kategoriModel->findAll()
+            'kategori' => $all_kategori,
+            'jumlah_termurah' => $jumlah_termurah,
+            'jumlah_termahal' => $jumlah_termahal,
+            'selected_kategori' => $selectedKategori ? explode(',', $selectedKategori) : [],
+            'selected_harga' => $selectedHarga
         ];
 
         return $this->render('home/produk/search', $data);

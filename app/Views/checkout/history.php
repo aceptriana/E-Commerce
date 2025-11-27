@@ -44,24 +44,28 @@
                                                 $statusClass = '';
                                                 $statusText = '';
                                                 switch ($order['status']) {
-                                                    case 'pending':
+                                                    case 'menunggu_pembayaran':
                                                         $statusClass = 'warning';
                                                         $statusText = 'Menunggu Pembayaran';
                                                         break;
-                                                    case 'success':
+                                                    case 'diproses':
+                                                        $statusClass = 'info';
+                                                        $statusText = 'Diproses';
+                                                        break;
+                                                    case 'dikirim':
+                                                        $statusClass = 'primary';
+                                                        $statusText = 'Dikirim';
+                                                        break;
+                                                    case 'selesai':
                                                         $statusClass = 'success';
-                                                        $statusText = 'Pembayaran Berhasil';
+                                                        $statusText = 'Selesai';
                                                         break;
-                                                    case 'failed':
+                                                    case 'dibatalkan':
                                                         $statusClass = 'danger';
-                                                        $statusText = 'Pembayaran Gagal';
-                                                        break;
-                                                    case 'expired':
-                                                        $statusClass = 'secondary';
-                                                        $statusText = 'Kadaluarsa';
+                                                        $statusText = 'Dibatalkan';
                                                         break;
                                                     default:
-                                                        $statusClass = 'info';
+                                                        $statusClass = 'secondary';
                                                         $statusText = ucfirst($order['status']);
                                                 }
                                                 ?>
@@ -69,6 +73,9 @@
                                             </td>
                                             <td>
                                                 <a href="<?= base_url('checkout/order/' . ($order['external_id'] ?? $order['id'])) ?>" class="btn_1 small">Detail</a>
+                                                <?php if ($order['status'] === 'menunggu_pembayaran'): ?>
+                                                    <a href="<?= base_url('checkout/pay/' . ($order['external_id'] ?? $order['id'])) ?>" class="btn btn-sm btn-success ms-1">Bayar</a>
+                                                <?php endif; ?>
                                                 <?php if (in_array($order['status'], ['selesai', 'dikirim', 'delivered'])): ?>
                                                     <a href="<?= base_url('returns/create/' . $order['id']) ?>" class="btn btn-sm btn-outline-danger ms-1">Minta Retur</a>
                                                 <?php endif; ?>

@@ -263,11 +263,6 @@
                             <span class="old_price">Rp <?= number_format($related['harga_diskon'], 0, ',', '.') ?></span>
                             <?php endif; ?>
                         </div>
-                        <ul>
-                            <li><a href="<?= base_url('favorit/tambah/'.$related['id']) ?>" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke favorit"><i class="ti-heart"></i><span>Tambah ke favorit</span></a></li>
-                            <li><a href="<?= base_url('bandingkan/tambah/'.$related['id']) ?>" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Bandingkan"><i class="ti-control-shuffle"></i><span>Bandingkan</span></a></li>
-                            <li><a href="<?= base_url('keranjang/tambah/'.$related['id']) ?>" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke keranjang"><i class="ti-shopping-cart"></i><span>Tambah ke keranjang</span></a></li>
-                        </ul>
                     </div>
                     <!-- /grid_item -->
                 </div>

@@ -239,11 +239,6 @@
                             <div class="price_box">
                                 <span class="new_price">Rp <?= number_format($related['harga'], 0, ',', '.'); ?></span>
                             </div>
-                            <ul>
-                                <li><a href="#0" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke favorit"><i class="ti-heart"></i><span>Tambah ke favorit</span></a></li>
-                                <li><a href="#0" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Bandingkan"><i class="ti-control-shuffle"></i><span>Bandingkan</span></a></li>
-                                <li><a href="#0" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke keranjang" onclick="addToCart(<?= $related['id']; ?>); return false;"><i class="ti-shopping-cart"></i><span>Tambah ke keranjang</span></a></li>
-                            </ul>
                         </div>
                         <!-- /grid_item -->
                     </div>

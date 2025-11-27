@@ -956,6 +956,103 @@ class Checkout extends BaseController
         return view('checkout/order_detail', $data);
     }
 
+    // Method untuk bayar ulang pesanan yang belum dibayar
+    public function pay($external_id = null)
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu');
+        }
+
+        if (!$external_id) {
+            return redirect()->to('/checkout/history')->with('error', 'Order tidak ditemukan');
+        }
+
+        $user_id = session()->get('user_id');
+        $order = $this->pesananModel->select('pesanan.*, pembayaran.external_id, pembayaran.status as payment_status, users.nama_lengkap as nama, users.email, users.no_telepon, users.alamat')
+                                 ->join('pembayaran', 'pembayaran.pesanan_id = pesanan.id', 'left')
+                                 ->join('users', 'users.id = pesanan.user_id', 'left')
+                                 ->where('pembayaran.external_id', $external_id)
+                                 ->where('pesanan.user_id', $user_id)
+                                 ->first();
+
+        if (!$order) {
+            return redirect()->to('/checkout/history')->with('error', 'Order tidak ditemukan');
+        }
+
+        // Cek apakah status masih menunggu pembayaran
+        if ($order['status'] !== 'menunggu_pembayaran') {
+            return redirect()->to('/checkout/history')->with('error', 'Pesanan ini sudah dibayar atau tidak dapat dibayar ulang');
+        }
+
+        // Ambil detail order
+        $order_details = $this->detailPesananModel->select('detail_pesanan.*, produk.nama_produk')
+                                               ->join('produk', 'produk.id = detail_pesanan.produk_id')
+                                               ->where('detail_pesanan.pesanan_id', $order['id'])
+                                               ->findAll();
+
+        // Fetch pengiriman data
+        $pengirimanModel = new \App\Models\PengirimanModel();
+        $pengiriman = $pengirimanModel->where('pesanan_id', $order['id'])->first();
+
+        // Siapkan data untuk Midtrans
+        $transaction_details = [
+            'order_id' => $external_id,
+            'gross_amount' => $order['total']
+        ];
+
+        $customer_details = [
+            'first_name' => $order['nama'],
+            'last_name' => '',
+            'email' => $order['email'],
+            'phone' => $order['no_telepon'],
+            'billing_address' => [
+                'address' => $order['alamat']
+            ],
+            'shipping_address' => [
+                'address' => $order['alamat_pengiriman'] ?? $order['alamat']
+            ]
+        ];
+
+        $item_details = [];
+        foreach ($order_details as $item) {
+            $item_details[] = [
+                'id' => $item['produk_id'],
+                'price' => $item['harga_satuan'],
+                'quantity' => $item['jumlah'],
+                'name' => $item['nama_produk']
+            ];
+        }
+
+        // Tambahkan biaya pengiriman ke item details
+        if ($pengiriman && $pengiriman['biaya_pengiriman'] > 0) {
+            $item_details[] = [
+                'id' => 'SHIPPING',
+                'price' => $pengiriman['biaya_pengiriman'],
+                'quantity' => 1,
+                'name' => 'Biaya Pengiriman - ' . $pengiriman['estimasi_pengiriman']
+            ];
+        }
+
+        // Buat transaksi
+        $transaction = [
+            'transaction_details' => $transaction_details,
+            'customer_details' => $customer_details,
+            'item_details' => $item_details
+        ];
+
+        try {
+            // Dapatkan Snap Token
+            $snapToken = \Midtrans\Snap::getSnapToken($transaction);
+
+            // Redirect ke Midtrans
+            return redirect()->to('https://app.sandbox.midtrans.com/snap/v2/vtweb/' . $snapToken);
+
+        } catch (\Exception $e) {
+            log_message('error', 'Midtrans Pay Error: ' . $e->getMessage());
+            return redirect()->to('/checkout/history')->with('error', 'Gagal memproses pembayaran: ' . $e->getMessage());
+        }
+    }
+
     // Method untuk riwayat pesanan
     public function history()
     {

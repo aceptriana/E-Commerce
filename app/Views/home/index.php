@@ -167,11 +167,6 @@
                     <div class="price_box">
                         <span class="new_price">Rp <?= number_format($item['harga'], 0, ',', '.') ?></span>
                     </div>
-                    <ul>
-                        <li><a href="<?= base_url('favorit/tambah/'.$item['id']) ?>" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke favorit"><i class="ti-heart"></i><span>Tambah ke favorit</span></a></li>
-                        <li><a href="<?= base_url('bandingkan/tambah/'.$item['id']) ?>" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Bandingkan"><i class="ti-control-shuffle"></i><span>Bandingkan</span></a></li>
-                        <li><a href="<?= base_url('keranjang/tambah/'.$item['id']) ?>" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke keranjang"><i class="ti-shopping-cart"></i><span>Tambah ke keranjang</span></a></li>
-                    </ul>
                 </div>
                 <!-- /grid_item -->
             </div>
@@ -209,11 +204,6 @@
                     <div class="price_box">
                         <span class="new_price">Rp 0</span>
                     </div>
-                    <ul>
-                        <li><a href="#" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke favorit"><i class="ti-heart"></i><span>Tambah ke favorit</span></a></li>
-                        <li><a href="#" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Bandingkan"><i class="ti-control-shuffle"></i><span>Bandingkan</span></a></li>
-                        <li><a href="#" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke keranjang"><i class="ti-shopping-cart"></i><span>Tambah ke keranjang</span></a></li>
-                    </ul>
                 </div>
                 <!-- /grid_item -->
             </div>

@@ -27,7 +27,7 @@
                                         <?= $kat['nama_kategori'] ?> 
                                         <small>(<?= $kat['jumlah_produk'] ?? 0 ?>)</small>
                                         <input type="checkbox" name="kategori[]" value="<?= $kat['id'] ?>" 
-                                            <?= ($kat['id'] == $kategori['id']) ? 'checked' : '' ?>>
+                                            <?= in_array($kat['id'], $selected_kategori ?? []) || $kat['id'] == $kategori['id'] ? 'checked' : '' ?>>
                                         <span class="checkmark"></span>
                                     </label>
                                 </li>
@@ -44,7 +44,8 @@
                                     <label class="container_check">
                                         Termurah (Rp 0 — Rp 100.000)
                                         <small>(<?= $jumlah_termurah ?? 0 ?>)</small>
-                                        <input type="checkbox" name="harga" value="termurah">
+                                        <input type="radio" name="harga" value="termurah" 
+                                            <?= ($selected_harga ?? '') === 'termurah' ? 'checked' : '' ?>>
                                         <span class="checkmark"></span>
                                     </label>
                                 </li>
@@ -52,7 +53,8 @@
                                     <label class="container_check">
                                         Termahal (Rp 100.000+)
                                         <small>(<?= $jumlah_termahal ?? 0 ?>)</small>
-                                        <input type="checkbox" name="harga" value="termahal">
+                                        <input type="radio" name="harga" value="termahal" 
+                                            <?= ($selected_harga ?? '') === 'termahal' ? 'checked' : '' ?>>
                                         <span class="checkmark"></span>
                                     </label>
                                 </li>
@@ -98,11 +100,6 @@
                                     <span class="old_price">Rp <?= number_format($item['harga_diskon'], 0, ',', '.') ?></span>
                                     <?php endif; ?>
                                 </div>
-                                <ul>
-                                    <li><a href="<?= base_url('favorit/tambah/'.$item['id']) ?>" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke favorit"><i class="ti-heart"></i><span>Tambah ke favorit</span></a></li>
-                                    <li><a href="<?= base_url('bandingkan/tambah/'.$item['id']) ?>" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Bandingkan"><i class="ti-control-shuffle"></i><span>Bandingkan</span></a></li>
-                                    <li><a href="<?= base_url('keranjang/tambah/'.$item['id']) ?>" class="tooltip-1" data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah ke keranjang"><i class="ti-shopping-cart"></i><span>Tambah ke keranjang</span></a></li>
-                                </ul>
                             </div>
                             <!-- /grid_item -->
                         </div>
