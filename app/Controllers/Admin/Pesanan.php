@@ -83,11 +83,18 @@ class Pesanan extends BaseController
         // Get info pengiriman
         $pengiriman = $this->pengirimanModel->where('pesanan_id', $id)->first();
 
+        $konfirmasiBy = null;
+        if (!empty($pesanan['konfirmasi_oleh'])) {
+            $konfirmasiUser = $this->userModel->find($pesanan['konfirmasi_oleh']);
+            $konfirmasiBy = $konfirmasiUser ? $konfirmasiUser['nama_lengkap'] : null;
+        }
+
         $data = [
             'title' => 'Detail Pesanan',
             'pesanan' => $pesanan,
             'detailPesanan' => $detailPesanan,
-            'pengiriman' => $pengiriman
+            'pengiriman' => $pengiriman,
+            'konfirmasi_by' => $konfirmasiBy
         ];
 
         return view('admin/pesanan/detail', $data);

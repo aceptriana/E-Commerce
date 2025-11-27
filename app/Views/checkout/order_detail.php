@@ -15,6 +15,11 @@
         <!-- /page_header -->
 
         <div class="row">
+            <?php if (session()->getFlashdata('success')): ?>
+                <div class="col-12">
+                    <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
+                </div>
+            <?php endif; ?>
             <div class="col-lg-8">
                 <div class="box_general">
                     <h4>Detail Produk</h4>
@@ -75,7 +80,6 @@
                     <p><strong>Alamat:</strong> <?= $order['alamat'] ?></p>
                     <p><strong>Jasa Pengiriman:</strong> <?= $order['shipping_service'] ?></p>
                     <p><strong>Deskripsi Pengiriman:</strong> <?= $order['shipping_description'] ?></p>
-                    <?php if ($order['status'] === 'dikirim' && !empty($order['no_resi'])): ?>
                         <div class="alert alert-info">
                             <p class="mb-0"><strong>Nomor Resi:</strong> <?= $order['no_resi'] ?></p>
                             <?php if ($order['shipping_service'] === 'jne'): ?>
@@ -85,8 +89,18 @@
                             <?php elseif ($order['shipping_service'] === 'tiki'): ?>
                                 <small><a href="https://tiki.id/id/tracking" target="_blank" class="text-primary">Lacak Pengiriman TIKI</a></small>
                             <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
+                    <?php if ($order['status'] === 'dikirim' && !empty($order['no_resi'])): ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if ($order['status'] === 'dikirim'): ?>
+                                        <div class="mt-3">
+                                            <form method="post" action="<?= base_url('checkout/confirm/'.$order['external_id']) ?>">
+                                                <?= csrf_field() ?>
+                                                <button type="submit" class="btn btn-success w-100">Konfirmasi Penerimaan</button>
+                                            </form>
+                                        </div>
+                                    <?php endif; ?>
                 </div>
 
                 <div class="box_general">
@@ -147,6 +161,11 @@
                     <?php if (in_array($order['status'], ['selesai', 'delivered'])): ?>
                         <div class="d-grid gap-2">
                             <a href="<?= base_url('returns/create/'.$order['id']) ?>" class="btn_1">Minta Retur / Pengembalian</a>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (!empty($order['tanggal_konfirmasi'])): ?>
+                        <div class="mt-2">
+                            <small class="text-muted">Pesanan dikonfirmasi oleh pembeli pada: <?= date('d/m/Y H:i', strtotime($order['tanggal_konfirmasi'])) ?></small>
                         </div>
                     <?php endif; ?>
                     

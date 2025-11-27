@@ -58,6 +58,10 @@
                         </div>
                         <div class="col-md-6">
                             <p><strong>Total:</strong> Rp <?= number_format($pesanan['total'], 0, ',', '.'); ?></p>
+                            <?php if (!empty($pesanan['tanggal_konfirmasi'])): ?>
+                                <p><strong>Dikonfirmasi Oleh:</strong> <?= $konfirmasi_by ?? '-' ?></p>
+                                <p><strong>Tanggal Konfirmasi:</strong> <?= date('d-m-Y H:i', strtotime($pesanan['tanggal_konfirmasi'])) ?></p>
+                            <?php endif; ?>
                             <!-- Removed Pre-Order display as it is no longer needed -->
                             <!-- Removed Estimasi Pengiriman related to is_preorder -->
                         </div>

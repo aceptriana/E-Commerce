@@ -167,6 +167,8 @@ $routes->get('checkout/order/(:any)', 'Checkout::order/$1');
 $routes->get('checkout/pay/(:any)', 'Checkout::pay/$1');
 $routes->get('checkout/pay-xendit/(:any)', 'Checkout::payXendit/$1');
 $routes->get('checkout/history', 'Checkout::history');
+// User confirm receipt
+$routes->post('checkout/confirm/(:any)', 'Checkout::confirmReceipt/$1');
 
 // Development-only debug route (shows order and product stock info)
 $routes->get('checkout/debug-order/(:num)', 'Checkout::debugOrder/$1');

@@ -956,6 +956,68 @@ class Checkout extends BaseController
         return view('checkout/order_detail', $data);
     }
 
+    // User confirms that order has been received
+    public function confirmReceipt($external_id = null)
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu');
+        }
+
+        if (!$external_id) {
+            return redirect()->back()->with('error', 'Order tidak ditemukan');
+        }
+
+        // Only allow POST to change state
+        if ($this->request->getMethod() !== 'post') {
+            return redirect()->back()->with('error', 'Invalid request method');
+        }
+
+        $user_id = session()->get('user_id');
+
+        // Find pembayaran and pesanan
+        $pembayaran = $this->pembayaranModel->where('external_id', $external_id)->first();
+        if (!$pembayaran) {
+            return redirect()->back()->with('error', 'Pembayaran tidak ditemukan');
+        }
+
+        $pesanan = $this->pesananModel->find($pembayaran['pesanan_id']);
+        if (!$pesanan) {
+            return redirect()->back()->with('error', 'Pesanan tidak ditemukan');
+        }
+
+        // Ensure the logged-in user is the owner
+        if ($pesanan['user_id'] != $user_id) {
+            return redirect()->back()->with('error', 'Akses ditolak');
+        }
+
+        // Only allow confirmation when order is in "dikirim" state
+        if ($pesanan['status'] !== 'dikirim') {
+            return redirect()->back()->with('error', 'Pesanan tidak dalam status yang dapat dikonfirmasi');
+        }
+
+        // Update pesanan
+        $updateData = [
+            'status' => 'selesai',
+            'konfirmasi_oleh' => $user_id,
+            'tanggal_konfirmasi' => date('Y-m-d H:i:s'),
+            'tanggal_update' => date('Y-m-d H:i:s')
+        ];
+
+        $this->pesananModel->update($pesanan['id'], $updateData);
+
+        // Also update pengiriman status to "sampai" if exists
+        $pengirimanModel = new \App\Models\PengirimanModel();
+        $pengiriman = $pengirimanModel->where('pesanan_id', $pesanan['id'])->first();
+        if ($pengiriman) {
+            $pengirimanModel->update($pengiriman['id'], ['status_pengiriman' => 'sampai']);
+        }
+
+        // Log for admin visibility
+        log_message('info', 'Order ' . $pesanan['id'] . ' confirmed received by user ' . $user_id);
+
+        return redirect()->to('/checkout/order/' . $external_id)->with('success', 'Terima kasih, pesanan telah dikonfirmasi.');
+    }
+
     // Method untuk bayar ulang pesanan yang belum dibayar
     public function pay($external_id = null)
     {

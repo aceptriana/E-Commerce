@@ -11,7 +11,9 @@ class PesananModel extends Model
     protected $useAutoIncrement = true;
     protected $allowedFields    = [
         'user_id', 'tanggal_pesanan', 'status', 'total', 
-        'alamat_pengiriman', 'no_resi'
+        'alamat_pengiriman', 'no_resi', 'tanggal_update',
+        // Confirmation fields
+        'konfirmasi_oleh', 'tanggal_konfirmasi'
     ];
 
     protected $useTimestamps = false;
